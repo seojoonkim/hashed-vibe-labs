@@ -866,7 +866,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "box-top":
       return (
         <motion.div
-          className={`${baseClass} text-[#e07a5f] border-t border-l border-r border-[#e07a5f] rounded-t px-2 py-1`}
+          className={`${baseClass} text-[#e07a5f] border-t-2 border-l-2 border-r-2 border-[#e07a5f] px-2 py-1`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           style={{ maxWidth: "400px" }}
@@ -876,7 +876,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "box-content": {
       return (
         <motion.div
-          className={`${baseClass} text-[#d8d8d8] border-l border-r border-[#e07a5f] px-3 py-0.5`}
+          className={`${baseClass} text-[#d8d8d8] border-l-2 border-r-2 border-[#e07a5f] px-3 py-0.5`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           style={{ maxWidth: "400px" }}
@@ -888,7 +888,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "box-bottom":
       return (
         <motion.div
-          className={`${baseClass} text-[#e07a5f] border-b border-l border-r border-[#e07a5f] rounded-b px-2 py-1`}
+          className={`${baseClass} text-[#e07a5f] border-b-2 border-l-2 border-r-2 border-[#e07a5f] px-2 py-1`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           style={{ maxWidth: "400px" }}

@@ -69,7 +69,7 @@ const BULLET_COLORS: Record<BulletColor, string> = {
 // Terminal line types
 interface TerminalLine {
   id: number;
-  type: "command" | "output" | "success" | "error" | "info" | "ascii" | "blank" | "header" | "list-item" | "divider" | "dim" | "link" | "blink" | "box-top" | "box-content" | "box-bottom" | "status-ok" | "status-info" | "system";
+  type: "command" | "output" | "success" | "error" | "info" | "ascii" | "blank" | "header" | "list-item" | "divider" | "dim" | "link" | "blink" | "box-top" | "box-content" | "box-bottom" | "status-ok" | "status-info" | "system" | "prompt";
   content: string;
   indent?: number;
   href?: string;
@@ -601,8 +601,8 @@ export default function TerminalApp() {
 
               {/* Big ASCII art - HASHED & VIBE LABS (line by line) */}
               {heroStep >= 5 && (
-                <div className="overflow-x-hidden">
-                  <div className={`text-[#e07a5f] leading-none whitespace-pre font-mono mb-1 ${isMobile ? 'text-[8px]' : 'text-xs sm:text-sm'}`} style={{ lineHeight: '1.2' }}>
+                <div className="overflow-x-hidden ascii-scanline">
+                  <div className={`text-[#e07a5f] leading-none whitespace-pre font-mono mb-1 ascii-glow ascii-flicker ${isMobile ? 'text-[9px]' : 'text-xs sm:text-sm'}`} style={{ lineHeight: '1.2' }}>
                     {HASHED_ASCII.map((line, i) => (
                       i < asciiLineIndex && (
                         <motion.div
@@ -615,7 +615,7 @@ export default function TerminalApp() {
                       )
                     ))}
                   </div>
-                  <div className={`text-[#e07a5f] leading-none whitespace-pre font-mono mb-2 ${isMobile ? 'text-[8px]' : 'text-xs sm:text-sm'}`} style={{ lineHeight: '1.2' }}>
+                  <div className={`text-[#e07a5f] leading-none whitespace-pre font-mono mb-2 ascii-glow ascii-flicker ${isMobile ? 'text-[9px]' : 'text-xs sm:text-sm'}`} style={{ lineHeight: '1.2' }}>
                     {VIBELABS_ASCII.map((line, i) => {
                       const globalIndex = HASHED_ASCII.length + i;
                       return globalIndex < asciiLineIndex && (
@@ -634,13 +634,13 @@ export default function TerminalApp() {
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="text-[#e07a5f] font-mono mt-4 text-xs sm:text-sm"
+                      className="text-[#e07a5f] font-mono mt-4 text-sm"
                     >
                       {BATCH_SUBTITLE}
                     </motion.div>
                   )}
                   {/* Taglines below batch subtitle - one line at a time */}
-                  <div className="font-mono mt-3 text-xs sm:text-sm text-[#d8d8d8]">
+                  <div className="font-mono mt-3 text-sm text-[#d8d8d8]">
                     {taglineIndex >= 2 && (
                       <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
                         {isKo ? "아이디어가 아닌, 속도를 봅니다." : "We look at speed, not ideas."}
@@ -671,7 +671,7 @@ export default function TerminalApp() {
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="text-[#fbbf24] font-mono mb-4 mt-4 text-xs sm:text-sm"
+                      className="text-[#fbbf24] font-mono mb-4 mt-4 text-sm"
                     >
                       {isKo ? "⏰ 지원 마감까지: " : "⏰ Application closes in: "}
                       <span className="text-white">
@@ -894,21 +894,41 @@ function LineBullet({ type, visible }: { type: TerminalLine["type"]; visible?: b
 
 // Terminal line component
 function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: TerminalLine; isMobile: boolean; isLastBlink?: boolean }) {
-  const baseClass = `font-mono ${isMobile ? 'text-sm' : 'text-sm'} leading-relaxed whitespace-pre-wrap break-words`;
+  const baseClass = `font-mono text-sm leading-relaxed whitespace-pre-wrap break-words`;
   const showCursor = line.isTyping && line.type !== "blank" && line.type !== "divider" && line.type !== "ascii";
 
   // Indented content class (for lines under paragraph headers)
   const indentedClass = "ml-5"; // matches bullet width + margin
+
+  // Animation props for better visibility on mobile
+  const lineAnimation = {
+    initial: { opacity: 0, y: 4 },
+    animate: { opacity: 1, y: 0 },
+    transition: { duration: 0.15, ease: "easeOut" }
+  };
 
   switch (line.type) {
     case "command":
       return (
         <motion.div
           className={`${baseClass} text-[#d8d8d8]`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          {...lineAnimation}
         >
           {line.content}{showCursor && <TypingCursor />}
+        </motion.div>
+      );
+    case "prompt":
+      return (
+        <motion.div
+          className={`${baseClass} text-[#888] mb-1`}
+          {...lineAnimation}
+        >
+          <span className="text-[#4ade80]">user@vibelabs</span>
+          <span className="text-[#888]">:</span>
+          <span className="text-[#60a5fa]">~</span>
+          <span className="text-[#888]">$ </span>
+          <span className="text-[#d8d8d8]">{line.content}</span>
+          {showCursor && <TypingCursor />}
         </motion.div>
       );
     // Colored text types - bullet visible when explicitly set, invisible spacer otherwise
@@ -916,8 +936,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
       return (
         <motion.div
           className={`${baseClass} text-[#34d399] flex items-center`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          {...lineAnimation}
         >
           <LineBullet type={line.type} visible={line.bullet} />
           <span>{line.content}{showCursor && <TypingCursor />}</span>
@@ -927,8 +946,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
       return (
         <motion.div
           className={`${baseClass} text-[#f87171] flex items-center`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          {...lineAnimation}
         >
           <LineBullet type={line.type} visible={line.bullet} />
           <span>{line.content}{showCursor && <TypingCursor />}</span>
@@ -938,8 +956,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
       return (
         <motion.div
           className={`${baseClass} text-[#22d3ee] flex items-center`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          {...lineAnimation}
         >
           <LineBullet type={line.type} visible={line.bullet} />
           <span>{line.content}{showCursor && <TypingCursor />}</span>
@@ -949,8 +966,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
       return (
         <motion.div
           className={`${baseClass} text-[#e07a5f] font-bold flex items-center`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          {...lineAnimation}
         >
           <LineBullet type={line.type} visible={line.bullet} />
           <span>{line.content}{showCursor && <TypingCursor />}</span>
@@ -961,8 +977,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
       return (
         <motion.div
           className={`${baseClass} text-[#d8d8d8] flex items-center`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          {...lineAnimation}
         >
           <LineBullet type={line.type} visible={line.bullet} />
           <span>{line.content}{showCursor && <TypingCursor />}</span>
@@ -972,8 +987,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
       return (
         <motion.div
           className={`${baseClass} text-[#777] flex items-center`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          {...lineAnimation}
         >
           <LineBullet type={line.type} visible={line.bullet} />
           <span>{line.content}{showCursor && <TypingCursor />}</span>
@@ -982,10 +996,9 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "ascii":
       return (
         <motion.div
-          className={`font-mono ${isMobile ? 'text-[8px]' : 'text-sm'} leading-tight whitespace-pre overflow-x-hidden`}
+          className={`font-mono ${isMobile ? 'text-[9px]' : 'text-sm'} leading-tight whitespace-pre overflow-x-hidden ascii-glow ascii-flicker`}
           style={{ color: '#e07a5f', lineHeight: '1.2' }}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          {...lineAnimation}
         >
           {line.content}
         </motion.div>
@@ -997,6 +1010,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
           className={`${baseClass} text-[#d8d8d8] ${indentedClass} flex items-start gap-2`}
           initial={{ opacity: 0, x: -5 }}
           animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.15, ease: "easeOut" }}
         >
           <span style={{ color: bulletColor }}>•</span>
           <span>{line.content}{showCursor && <TypingCursor />}</span>
@@ -1008,6 +1022,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
           className="my-2 border-t border-[#444] max-w-full"
           initial={{ opacity: 0, scaleX: 0 }}
           animate={{ opacity: 1, scaleX: 1 }}
+          transition={{ duration: 0.2, ease: "easeOut" }}
         />
       );
     case "link":
@@ -1021,8 +1036,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
           target="_blank"
           rel="noopener noreferrer"
           className={`${baseClass} text-[#60a5fa] hover:text-[#93c5fd] cursor-pointer block transition-colors`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          {...lineAnimation}
         >
           <span className="no-underline">{arrowPrefix}</span>
           <span className="underline underline-offset-2">{linkText}</span>
@@ -1033,9 +1047,9 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
       return (
         <motion.div
           className={`${baseClass} text-[#777]`}
-          initial={{ opacity: 0 }}
-          animate={isLastBlink ? { opacity: [0.4, 1, 0.4] } : { opacity: 1 }}
-          transition={isLastBlink ? { duration: 1.5, repeat: Infinity, ease: "easeInOut" } : undefined}
+          initial={{ opacity: 0, y: 4 }}
+          animate={isLastBlink ? { opacity: [0.4, 1, 0.4], y: 0 } : { opacity: 1, y: 0 }}
+          transition={isLastBlink ? { duration: 1.5, repeat: Infinity, ease: "easeInOut" } : { duration: 0.15, ease: "easeOut" }}
         >
           {line.content}
         </motion.div>
@@ -1046,8 +1060,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
       return (
         <motion.div
           className={`${baseClass} text-[#e07a5f] border-t-2 border-l-2 border-r-2 border-[#e07a5f] px-2 py-1`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          {...lineAnimation}
           style={{ maxWidth: "400px" }}
         >
         </motion.div>
@@ -1056,8 +1069,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
       return (
         <motion.div
           className={`${baseClass} text-[#d8d8d8] border-l-2 border-r-2 border-[#e07a5f] px-3 py-0.5`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          {...lineAnimation}
           style={{ maxWidth: "400px" }}
         >
           {line.content}{showCursor && <TypingCursor />}
@@ -1068,8 +1080,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
       return (
         <motion.div
           className={`${baseClass} text-[#e07a5f] border-b-2 border-l-2 border-r-2 border-[#e07a5f] px-2 py-1`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          {...lineAnimation}
           style={{ maxWidth: "400px" }}
         >
         </motion.div>
@@ -1078,8 +1089,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
       return (
         <motion.div
           className={`${baseClass} flex items-center gap-2`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          {...lineAnimation}
         >
           <span className="text-[#34d399]">[OK]</span>
           <span className="text-[#d8d8d8]">{line.content}{showCursor && <TypingCursor />}</span>
@@ -1089,8 +1099,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
       return (
         <motion.div
           className={`${baseClass} flex items-center gap-2`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          {...lineAnimation}
         >
           <span className="text-[#22d3ee]">[INFO]</span>
           <span className="text-[#d8d8d8]">{line.content}{showCursor && <TypingCursor />}</span>
@@ -1100,8 +1109,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
       return (
         <motion.div
           className={`${baseClass} text-[#666]`}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
+          {...lineAnimation}
         >
           <span className="text-[#555]">[system]</span> {line.content}{showCursor && <TypingCursor />}
         </motion.div>
@@ -1237,6 +1245,9 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
   switch (sectionId) {
     // ========== /about: Vibe Labs 소개 (What is + Why Now) ==========
     case "about":
+      // Terminal prompt style command
+      lines.push({ type: "prompt", content: "cat about.md" });
+      lines.push({ type: "blank", content: "" });
       // ASCII art header
       ABOUT_ASCII.forEach(line => {
         lines.push({ type: "ascii", content: line });
@@ -1375,6 +1386,9 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
 
     // ========== /who: 지원 대상 (Who Should Apply + Evaluation Criteria) ==========
     case "who":
+      // Terminal prompt style command
+      lines.push({ type: "prompt", content: "cat eligibility.md" });
+      lines.push({ type: "blank", content: "" });
       // ASCII art header
       WHO_ASCII.forEach(line => {
         lines.push({ type: "ascii", content: line });
@@ -1511,6 +1525,9 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
 
     // ========== /program: 프로그램 구조 ==========
     case "program":
+      // Terminal prompt style command
+      lines.push({ type: "prompt", content: "cat program.md" });
+      lines.push({ type: "blank", content: "" });
       // ASCII art header
       PROGRAM_ASCII.forEach(line => {
         lines.push({ type: "ascii", content: line });
@@ -1566,6 +1583,9 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
 
     // ========== /timeline: 일정 ==========
     case "timeline":
+      // Terminal prompt style command
+      lines.push({ type: "prompt", content: "cat timeline.md" });
+      lines.push({ type: "blank", content: "" });
       // ASCII art header
       TIMELINE_ASCII.forEach(line => {
         lines.push({ type: "ascii", content: line });
@@ -1658,6 +1678,9 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
       break;
 
     case "hashed":
+      // Terminal prompt style command
+      lines.push({ type: "prompt", content: "cat hashed.md" });
+      lines.push({ type: "blank", content: "" });
       // ASCII art header
       HASHED_SECTION_ASCII.forEach(line => {
         lines.push({ type: "ascii", content: line });
@@ -1874,6 +1897,9 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
       break;
 
     case "apply":
+      // Terminal prompt style command
+      lines.push({ type: "prompt", content: "./apply --batch=1" });
+      lines.push({ type: "blank", content: "" });
       // ASCII art header
       APPLY_ASCII.forEach(line => {
         lines.push({ type: "ascii", content: line });

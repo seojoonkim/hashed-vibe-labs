@@ -518,7 +518,7 @@ export default function TerminalApp() {
     : "Closed";
 
   return (
-    <div className={`h-screen bg-[#0d0d0d] text-[#d8d8d8] font-mono flex flex-col overflow-hidden ${isMobile ? 'p-1' : 'p-2'} ${isMobile ? 'text-sm' : 'text-sm'}`}>
+    <div className={`min-h-[100dvh] h-[100dvh] bg-[#0d0d0d] text-[#d8d8d8] font-mono flex flex-col overflow-hidden ${isMobile ? 'p-1 pb-[env(safe-area-inset-bottom)]' : 'p-2'} ${isMobile ? 'text-sm' : 'text-sm'}`}>
       {/* Terminal window with border */}
       <div className="flex-1 flex flex-col overflow-hidden overflow-x-hidden bg-[#1a1a1a] border border-[#333] rounded-lg">
       {/* Terminal Header - Fixed */}
@@ -531,9 +531,9 @@ export default function TerminalApp() {
               <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
               <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
             </div>
-            {/* Terminal title */}
+            {/* Terminal title with PID */}
             <span className="text-[#888] text-sm ml-2">
-              hashed — vibe-labs-seoul-2026
+              hashed — vibe-labs-seoul-2026 <span className="text-[#555]">(pid: 2847)</span>
             </span>
           </div>
           {/* Countdown on desktop - only render when mounted to avoid hydration mismatch */}
@@ -577,9 +577,9 @@ export default function TerminalApp() {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.2 }}
-                    className="text-[#666] text-xs mt-1"
+                    className="text-[#888] mt-1"
                   >
-                    <span className="text-[#555]">[system]</span> node v20.11.0 | next 14.2.35 | seoul-kr-1
+                    <span className="text-[#888]">[system]</span> node v20.11.0 | next 14.2.35 | seoul-kr-1
                   </motion.div>
                 )}
               </div>
@@ -642,24 +642,45 @@ export default function TerminalApp() {
                   {/* Taglines below batch subtitle - one line at a time */}
                   <div className="font-mono mt-3 text-sm text-[#d8d8d8]">
                     {taglineIndex >= 2 && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                      <motion.div
+                        key="tagline-1"
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
                         {isKo ? "아이디어가 아닌, 속도를 봅니다." : "We look at speed, not ideas."}
                       </motion.div>
                     )}
                     {taglineIndex >= 3 && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                      <motion.div
+                        key="tagline-2"
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
                         {isKo ? "설명이 아닌, 결과물을 봅니다." : "We look at output, not explanations."}
                       </motion.div>
                     )}
                     {taglineIndex >= 4 && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="mt-3">
+                      <motion.div
+                        key="tagline-3"
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2 }}
+                        className="mt-3"
+                      >
                         {isKo
                           ? "선발 즉시 5% 지분에 1억원 투자 + Hashed 및 계열사들의 모든 글로벌 네트워크와 리소스 지원"
                           : "100M KRW for 5% equity upon selection + Full global network & resources of Hashed and its affiliates"}
                       </motion.div>
                     )}
                     {taglineIndex >= 5 && (
-                      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                      <motion.div
+                        key="tagline-4"
+                        initial={{ opacity: 0, y: 4 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.2 }}
+                      >
                         {isKo
                           ? "Claude 개발사 Anthropic 본사의 지원을 포함, 국내외 최고 수준의 바이브 코딩 개발자들이 멘토로 참여"
                           : "Mentored by world-class vibe coders, with support from Anthropic (creators of Claude)"}
@@ -669,8 +690,10 @@ export default function TerminalApp() {
                   {/* Countdown timer - only render when mounted to avoid hydration mismatch */}
                   {taglineIndex >= 6 && countdown.mounted && countdown.total > 0 && (
                     <motion.div
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
+                      key="countdown"
+                      initial={{ opacity: 0, y: 4 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.2 }}
                       className="text-[#fbbf24] font-mono mb-4 mt-4 text-sm"
                     >
                       {isKo ? "⏰ 지원 마감까지: " : "⏰ Application closes in: "}
@@ -692,9 +715,10 @@ export default function TerminalApp() {
               {/* Credit line - system message style */}
               {heroStep >= 6 && taglineIndex >= totalTaglines && (
                 <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3 }}
+                  key="credit-line"
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.2, delay: 0.1 }}
                   className="mb-3 text-[#555] text-xs font-mono"
                 >
                   <span className="text-[#666]">[</span>
@@ -709,9 +733,10 @@ export default function TerminalApp() {
               {/* Login message - directly below ASCII art, hide when navigating to next section */}
               {heroStep >= 6 && taglineIndex >= totalTaglines && currentSectionIndex === -1 && (
                 <motion.div
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: [0.4, 1, 0.4] }}
-                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
+                  key="login-message"
+                  initial={{ opacity: 0, y: 4 }}
+                  animate={{ opacity: [0.4, 1, 0.4], y: 0 }}
+                  transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
                   className="mb-4"
                 >
                   <span className="text-[#808080]">
@@ -756,10 +781,25 @@ export default function TerminalApp() {
       </div>
       </div>
 
+      {/* Status bar - terminal metrics */}
+      <div className="flex-shrink-0 bg-[#1a1a1a] border-t border-[#333] px-3 py-1">
+        <div className={`${isMobile ? '' : 'max-w-[900px] mx-auto w-full'} flex items-center justify-between text-[10px] text-[#555]`}>
+          <div className="flex items-center gap-3">
+            <span>MEM: 48MB</span>
+            <span>CPU: 2%</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span>UTF-8</span>
+            <span>LF</span>
+            <span>{isKo ? "한국어" : "English"}</span>
+          </div>
+        </div>
+      </div>
+
       {/* Input prompt - fixed at bottom */}
       <div
         ref={inputRef}
-        className="flex-shrink-0 bg-[#1a1a1a] border-t border-[#333] cursor-pointer group rounded-b-lg"
+        className="flex-shrink-0 bg-[#1a1a1a] cursor-pointer group rounded-b-lg"
         onClick={() => openMenu()}
       >
         <div className={`${isMobile ? 'px-4' : 'max-w-[900px] mx-auto w-full px-6'} py-3`}>
@@ -1108,10 +1148,10 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "system":
       return (
         <motion.div
-          className={`${baseClass} text-[#666]`}
+          className={`${baseClass} text-[#888]`}
           {...lineAnimation}
         >
-          <span className="text-[#555]">[system]</span> {line.content}{showCursor && <TypingCursor />}
+          <span className="text-[#888]">[system]</span> {line.content}{showCursor && <TypingCursor />}
         </motion.div>
       );
     default:

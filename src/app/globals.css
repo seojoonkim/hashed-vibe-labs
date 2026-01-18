@@ -32,6 +32,9 @@
 html {
   scroll-behavior: smooth;
   font-size: 16px;
+  /* iOS Safari viewport fix */
+  height: 100%;
+  height: -webkit-fill-available;
 }
 
 body {
@@ -42,6 +45,9 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
+  min-height: 100dvh;
+  /* iOS Safari safe area support */
+  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* Monospace font for terminal elements - with Korean fallback */

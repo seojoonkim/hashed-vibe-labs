@@ -446,7 +446,7 @@ export default function TerminalApp() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.2 }}
-                      className="font-mono mt-3 text-xs sm:text-sm text-[#f0f0f0]"
+                      className="font-mono mt-3 text-xs sm:text-sm text-[#e5e5e5]"
                     >
                       <div>{isKo ? "아이디어가 아닌, 속도를 봅니다." : "We look at speed, not ideas."}</div>
                       <div>{isKo ? "설명이 아닌, 결과물을 봅니다." : "We look at output, not explanations."}</div>
@@ -472,13 +472,13 @@ export default function TerminalApp() {
                       {isKo ? "⏰ 지원 마감까지: " : "⏰ Application closes in: "}
                       <span className="text-white font-bold">
                         {countdown.days}
-                        <span className="text-[#888]">{isKo ? "일 " : "d "}</span>
+                        <span className="text-[#777]">{isKo ? "일 " : "d "}</span>
                         {String(countdown.hours).padStart(2, '0')}
-                        <span className="text-[#888]">{isKo ? "시 " : "h "}</span>
+                        <span className="text-[#777]">{isKo ? "시 " : "h "}</span>
                         {String(countdown.minutes).padStart(2, '0')}
-                        <span className="text-[#888]">{isKo ? "분 " : "m "}</span>
+                        <span className="text-[#777]">{isKo ? "분 " : "m "}</span>
                         {String(countdown.seconds).padStart(2, '0')}
-                        <span className="text-[#888]">{isKo ? "초" : "s"}</span>
+                        <span className="text-[#777]">{isKo ? "초" : "s"}</span>
                       </span>
                     </motion.div>
                   )}
@@ -623,7 +623,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "command":
       return (
         <motion.div
-          className={`${baseClass} text-[#f0f0f0]`}
+          className={`${baseClass} text-[#e5e5e5]`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
@@ -663,7 +663,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "dim":
       return (
         <motion.div
-          className={`${baseClass} text-[#888]`}
+          className={`${baseClass} text-[#777]`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
@@ -694,11 +694,11 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "list-item":
       return (
         <motion.div
-          className={`${baseClass} text-[#f0f0f0] flex items-start gap-2`}
+          className={`${baseClass} text-[#e5e5e5] flex items-start gap-2`}
           initial={{ opacity: 0, x: -5 }}
           animate={{ opacity: 1, x: 0 }}
         >
-          <span className="text-[#888]">•</span>
+          <span className="text-[#777]">•</span>
           <span>{line.content}</span>
         </motion.div>
       );
@@ -732,7 +732,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "blink":
       return (
         <motion.div
-          className={`${baseClass} text-[#888]`}
+          className={`${baseClass} text-[#777]`}
           initial={{ opacity: 0 }}
           animate={isLastBlink ? { opacity: [0.4, 1, 0.4] } : { opacity: 1 }}
           transition={isLastBlink ? { duration: 1.5, repeat: Infinity, ease: "easeInOut" } : undefined}
@@ -745,7 +745,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     default:
       return (
         <motion.div
-          className={`${baseClass} text-[#f0f0f0]`}
+          className={`${baseClass} text-[#e5e5e5]`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >

@@ -5,6 +5,11 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
 import { PROGRAM_DATA } from "@/lib/constants";
 
+// Animation timing constants (all in ms)
+const ANIMATION_SPEED = 180; // Base speed for text lines
+const HERO_STEP_DELAY = 750; // Delay between hero animation steps
+const ASCII_LINE_DELAY = 105; // Delay per ASCII art line
+
 // Application deadline: February 19, 2026, 23:59:59 KST
 const DEADLINE = new Date("2026-02-19T23:59:59+09:00").getTime();
 
@@ -25,11 +30,16 @@ function calculateTimeLeft() {
   return { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 };
 }
 
-// Countdown hook
+// Countdown hook - initializes with null to avoid hydration mismatch
 function useCountdown() {
-  const [timeLeft, setTimeLeft] = useState(calculateTimeLeft);
+  const [mounted, setMounted] = useState(false);
+  const [timeLeft, setTimeLeft] = useState<ReturnType<typeof calculateTimeLeft> | null>(null);
 
   useEffect(() => {
+    setMounted(true);
+    // Set initial value on client side only
+    setTimeLeft(calculateTimeLeft());
+
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft());
     }, 1000);
@@ -37,7 +47,11 @@ function useCountdown() {
     return () => clearInterval(timer);
   }, []);
 
-  return timeLeft;
+  // Return default values during SSR/initial render, plus mounted flag
+  return {
+    ...(timeLeft ?? { days: 0, hours: 0, minutes: 0, seconds: 0, total: 0 }),
+    mounted
+  };
 }
 
 // Terminal line types
@@ -217,7 +231,7 @@ export default function TerminalApp() {
   }, []);
 
   // Add lines with typing effect
-  const addLines = useCallback(async (newLines: Omit<TerminalLine, "id">[], delay = 100) => {
+  const addLines = useCallback(async (newLines: Omit<TerminalLine, "id">[], delay = ANIMATION_SPEED) => {
     setIsTyping(true);
     for (const line of newLines) {
       await new Promise(resolve => setTimeout(resolve, delay));
@@ -300,11 +314,11 @@ export default function TerminalApp() {
       if (step <= totalSteps) {
         setHeroStep(step);
         step++;
-        setTimeout(animate, step === 1 ? 300 : step === 4 ? 150 : 400);
+        setTimeout(animate, HERO_STEP_DELAY);
       }
     };
 
-    setTimeout(animate, 200);
+    setTimeout(animate, HERO_STEP_DELAY);
   }, [showHero, heroStep]);
 
   // ASCII art line-by-line animation
@@ -315,7 +329,7 @@ export default function TerminalApp() {
 
     const timer = setTimeout(() => {
       setAsciiLineIndex(prev => prev + 1);
-    }, 50); // 50ms per line
+    }, ASCII_LINE_DELAY);
 
     return () => clearTimeout(timer);
   }, [heroStep, asciiLineIndex, totalAsciiLines]);
@@ -330,8 +344,8 @@ export default function TerminalApp() {
     // Show each loading message with animation
     for (let i = 0; i < langMessages.length; i++) {
       setLoadingState({ isLoading: true, sectionId, messageIndex: i });
-      // Last message (Done!) shows briefly
-      const delay = i === langMessages.length - 1 ? 300 : 600;
+      // Last message (Done!) shows briefly, others show longer
+      const delay = i === langMessages.length - 1 ? ANIMATION_SPEED * 2 : ANIMATION_SPEED * 4;
       await new Promise(resolve => setTimeout(resolve, delay));
     }
 
@@ -368,21 +382,24 @@ export default function TerminalApp() {
       setCurrentSectionIndex(sectionIndex);
     }
 
-    // Add command line (85ms = 30% slower than 65ms)
+    // Remove previous "blink" lines (Press Enter to continue...)
+    setLines(prev => prev.filter(line => line.type !== "blink"));
+
+    // Add command line
     await addLines([
       { type: "blank", content: "" },
       { type: "command", content: `> ${command.command}` },
-    ], 85);
+    ], ANIMATION_SPEED);
 
     // Show loading animation
     await showLoading(commandId);
 
     // Add blank line after loading
-    await addLines([{ type: "blank", content: "" }], 50);
+    await addLines([{ type: "blank", content: "" }], ANIMATION_SPEED);
 
     // Get section content
     const sectionLines = getSectionContent(commandId, language);
-    await addLines(sectionLines, 85);
+    await addLines(sectionLines, ANIMATION_SPEED);
   };
 
   // Handle keyboard shortcuts
@@ -457,8 +474,8 @@ export default function TerminalApp() {
               hashed — vibe-camp-seoul-2026
             </span>
           </div>
-          {/* Countdown on desktop */}
-          {!isMobile && countdown.total > 0 && (
+          {/* Countdown on desktop - only render when mounted to avoid hydration mismatch */}
+          {!isMobile && countdown.mounted && countdown.total > 0 && (
             <div className="flex items-center gap-2 text-sm">
               <span className="text-[#666]">{isKo ? "마감까지" : "Deadline"}</span>
               <span className="text-[#e07a5f] font-bold">{countdownStr}</span>
@@ -495,12 +512,12 @@ export default function TerminalApp() {
                 )}
               </div>
 
-              {/* Welcome box border - salmon/coral color */}
+              {/* Welcome box border - salmon/coral color, 2px no rounded */}
               {heroStep >= 4 && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="border border-[#e07a5f] rounded-sm px-4 py-3 mb-8 self-start"
+                  className="border-2 border-[#e07a5f] px-4 py-3 mb-8 self-start"
                 >
                   <div className="flex items-center gap-2 text-[#e07a5f]">
                     <span>✱</span>
@@ -572,8 +589,8 @@ export default function TerminalApp() {
                       </div>
                     </motion.div>
                   )}
-                  {/* Countdown timer */}
-                  {asciiLineIndex >= totalAsciiLines && countdown.total > 0 && (
+                  {/* Countdown timer - only render when mounted to avoid hydration mismatch */}
+                  {asciiLineIndex >= totalAsciiLines && countdown.mounted && countdown.total > 0 && (
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}

@@ -663,7 +663,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "dim":
       return (
         <motion.div
-          className={`${baseClass} text-[#666]`}
+          className={`${baseClass} text-[#999]`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >

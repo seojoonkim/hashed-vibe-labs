@@ -150,6 +150,37 @@ const APPLY_ASCII = [
 // Section flow order
 const SECTION_ORDER = ["about", "who", "program", "timeline", "hashed", "apply"];
 
+// Loading spinner frames (braille pattern)
+const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
+
+// Loading messages for each section
+const LOADING_MESSAGES: Record<string, { ko: string[]; en: string[] }> = {
+  about: {
+    ko: ["데이터 로딩 중...", "Vibe Camp 정보 불러오는 중...", "완료!"],
+    en: ["Loading data...", "Fetching Vibe Camp info...", "Done!"],
+  },
+  who: {
+    ko: ["지원 자격 확인 중...", "평가 기준 로딩 중...", "완료!"],
+    en: ["Checking eligibility...", "Loading criteria...", "Done!"],
+  },
+  program: {
+    ko: ["프로그램 구조 분석 중...", "일정 데이터 로딩 중...", "완료!"],
+    en: ["Analyzing program structure...", "Loading schedule data...", "Done!"],
+  },
+  timeline: {
+    ko: ["타임라인 생성 중...", "일정 동기화 중...", "완료!"],
+    en: ["Generating timeline...", "Syncing schedule...", "Done!"],
+  },
+  hashed: {
+    ko: ["Hashed 포트폴리오 로딩 중...", "네트워크 데이터 수집 중...", "완료!"],
+    en: ["Loading Hashed portfolio...", "Gathering network data...", "Done!"],
+  },
+  apply: {
+    ko: ["지원서 양식 준비 중...", "투자 조건 확인 중...", "완료!"],
+    en: ["Preparing application form...", "Verifying investment terms...", "Done!"],
+  },
+};
+
 export default function TerminalApp() {
   const { language, setLanguage } = useI18n();
   const [lines, setLines] = useState<TerminalLine[]>([]);
@@ -162,6 +193,7 @@ export default function TerminalApp() {
   const [heroStep, setHeroStep] = useState(0); // For sequential hero animation
   const [asciiLineIndex, setAsciiLineIndex] = useState(0); // For line-by-line ASCII animation
   const [currentSectionIndex, setCurrentSectionIndex] = useState(-1); // Track current section (-1 = hero)
+  const [loadingState, setLoadingState] = useState<{ isLoading: boolean; sectionId: string; messageIndex: number } | null>(null);
   const terminalBodyRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLDivElement>(null);
   const lineIdRef = useRef(0);
@@ -288,10 +320,28 @@ export default function TerminalApp() {
     return () => clearTimeout(timer);
   }, [heroStep, asciiLineIndex, totalAsciiLines]);
 
+  // Show loading animation
+  const showLoading = useCallback(async (sectionId: string): Promise<void> => {
+    const messages = LOADING_MESSAGES[sectionId];
+    if (!messages) return;
+
+    const langMessages = language === "ko" ? messages.ko : messages.en;
+
+    // Show each loading message with animation
+    for (let i = 0; i < langMessages.length; i++) {
+      setLoadingState({ isLoading: true, sectionId, messageIndex: i });
+      // Last message (Done!) shows briefly
+      const delay = i === langMessages.length - 1 ? 300 : 600;
+      await new Promise(resolve => setTimeout(resolve, delay));
+    }
+
+    setLoadingState(null);
+  }, [language]);
+
   // Handle command selection
   const handleCommand = async (commandId: string) => {
     // Prevent duplicate execution while already typing
-    if (isTyping) return;
+    if (isTyping || loadingState?.isLoading) return;
 
     closeMenu();
 
@@ -322,8 +372,13 @@ export default function TerminalApp() {
     await addLines([
       { type: "blank", content: "" },
       { type: "command", content: `> ${command.command}` },
-      { type: "blank", content: "" },
     ], 85);
+
+    // Show loading animation
+    await showLoading(commandId);
+
+    // Add blank line after loading
+    await addLines([{ type: "blank", content: "" }], 50);
 
     // Get section content
     const sectionLines = getSectionContent(commandId, language);
@@ -569,6 +624,17 @@ export default function TerminalApp() {
             />
           ));
         })()}
+
+        {/* Loading spinner */}
+        {loadingState && (
+          <LoadingSpinner
+            sectionId={loadingState.sectionId}
+            messageIndex={loadingState.messageIndex}
+            language={language}
+            isMobile={isMobile}
+          />
+        )}
+
         {/* Bottom padding for fixed input */}
         <div className="h-4" />
       </div>
@@ -808,6 +874,56 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
         </motion.div>
       );
   }
+}
+
+// Loading spinner component with Claude Code style animation
+function LoadingSpinner({
+  sectionId,
+  messageIndex,
+  language,
+  isMobile,
+}: {
+  sectionId: string;
+  messageIndex: number;
+  language: string;
+  isMobile: boolean;
+}) {
+  const [spinnerFrame, setSpinnerFrame] = useState(0);
+  const messages = LOADING_MESSAGES[sectionId];
+  const langMessages = language === "ko" ? messages?.ko : messages?.en;
+  const currentMessage = langMessages?.[messageIndex] || "";
+  const isDone = messageIndex === (langMessages?.length || 0) - 1;
+
+  useEffect(() => {
+    if (isDone) return;
+    const interval = setInterval(() => {
+      setSpinnerFrame((prev) => (prev + 1) % SPINNER_FRAMES.length);
+    }, 80);
+    return () => clearInterval(interval);
+  }, [isDone]);
+
+  const baseClass = `font-mono ${isMobile ? "text-xs" : "text-sm"} leading-relaxed`;
+
+  return (
+    <motion.div
+      className={`${baseClass} flex items-center gap-2`}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+    >
+      {isDone ? (
+        <>
+          <span className="text-[#34d399]">✓</span>
+          <span className="text-[#34d399]">{currentMessage}</span>
+        </>
+      ) : (
+        <>
+          <span className="text-[#e07a5f]">{SPINNER_FRAMES[spinnerFrame]}</span>
+          <span className="text-[#888]">{currentMessage}</span>
+        </>
+      )}
+    </motion.div>
+  );
 }
 
 // Get section content as terminal lines

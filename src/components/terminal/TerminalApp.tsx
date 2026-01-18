@@ -716,17 +716,15 @@ export default function TerminalApp() {
               {heroStep >= 6 && taglineIndex >= totalTaglines && (
                 <motion.div
                   key="credit-line"
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: 1, y: 0 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
                   transition={{ duration: 0.2, delay: 0.1 }}
-                  className="mb-3 text-[#555] text-xs font-mono"
+                  className="mb-3 text-[#888] font-mono"
                 >
-                  <span className="text-[#666]">[</span>
-                  <span className="text-[#888]">system</span>
-                  <span className="text-[#666]">]</span>
-                  <span className="text-[#555]">{" "}vibe-coded by{" "}</span>
-                  <a href="mailto:simon@hashed.com" className="text-[#777] hover:text-[#999]">simon@hashed.com</a>
-                  <span className="text-[#555]">{" "}× Claude Opus 4.5</span>
+                  <span className="text-[#888]">[system]</span>
+                  <span className="text-[#888]">{" "}vibe-coded by{" "}</span>
+                  <a href="mailto:simon@hashed.com" className="text-[#888] hover:text-[#aaa]">simon@hashed.com</a>
+                  <span className="text-[#888]">{" "}× Claude Opus 4.5</span>
                 </motion.div>
               )}
 
@@ -781,25 +779,10 @@ export default function TerminalApp() {
       </div>
       </div>
 
-      {/* Status bar - terminal metrics */}
-      <div className="flex-shrink-0 bg-[#1a1a1a] border-t border-[#333] px-3 py-1">
-        <div className={`${isMobile ? '' : 'max-w-[900px] mx-auto w-full'} flex items-center justify-between text-[10px] text-[#555]`}>
-          <div className="flex items-center gap-3">
-            <span>MEM: 48MB</span>
-            <span>CPU: 2%</span>
-          </div>
-          <div className="flex items-center gap-3">
-            <span>UTF-8</span>
-            <span>LF</span>
-            <span>{isKo ? "한국어" : "English"}</span>
-          </div>
-        </div>
-      </div>
-
       {/* Input prompt - fixed at bottom */}
       <div
         ref={inputRef}
-        className="flex-shrink-0 bg-[#1a1a1a] cursor-pointer group rounded-b-lg"
+        className="flex-shrink-0 bg-[#1a1a1a] border-t border-[#333] cursor-pointer group rounded-b-lg"
         onClick={() => openMenu()}
       >
         <div className={`${isMobile ? 'px-4' : 'max-w-[900px] mx-auto w-full px-6'} py-3`}>
@@ -1036,7 +1019,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "ascii":
       return (
         <motion.div
-          className={`font-mono ${isMobile ? 'text-[9px]' : 'text-sm'} leading-tight whitespace-pre overflow-x-hidden ascii-glow ascii-flicker`}
+          className={`font-mono ${isMobile ? 'text-[9px]' : 'text-sm'} leading-tight whitespace-pre overflow-x-hidden`}
           style={{ color: '#e07a5f', lineHeight: '1.2' }}
           {...lineAnimation}
         >
@@ -1087,8 +1070,8 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
       return (
         <motion.div
           className={`${baseClass} text-[#777]`}
-          initial={{ opacity: 0, y: 4 }}
-          animate={isLastBlink ? { opacity: [0.4, 1, 0.4], y: 0 } : { opacity: 1, y: 0 }}
+          initial={{ opacity: 0 }}
+          animate={isLastBlink ? { opacity: [0.4, 1, 0.4] } : { opacity: 1 }}
           transition={isLastBlink ? { duration: 1.5, repeat: Infinity, ease: "easeInOut" } : { duration: 0.15, ease: "easeOut" }}
         >
           {line.content}

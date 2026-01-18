@@ -866,49 +866,33 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "box-top":
       return (
         <motion.div
-          className={`${baseClass} text-[#e07a5f]`}
+          className={`${baseClass} text-[#e07a5f] border-t border-l border-r border-[#e07a5f] rounded-t px-2 py-1`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
+          style={{ maxWidth: "400px" }}
         >
-          ┌{"─".repeat(50)}┐
         </motion.div>
       );
     case "box-content": {
-      // Calculate display width (Korean/CJK characters count as 2)
-      const getDisplayWidth = (str: string) => {
-        let width = 0;
-        for (const char of str) {
-          // CJK characters, emojis take 2 spaces
-          if (/[\u3000-\u9fff\uac00-\ud7af\u{1F300}-\u{1F9FF}]/u.test(char)) {
-            width += 2;
-          } else {
-            width += 1;
-          }
-        }
-        return width;
-      };
-      const contentWidth = getDisplayWidth(line.content);
-      // Box is: │ + space + content(48) + space + │ = total width matches ─.repeat(50)
-      const padding = Math.max(0, 48 - contentWidth);
-      const paddedContent = line.content + " ".repeat(padding);
       return (
         <motion.div
-          className={`${baseClass} text-[#d8d8d8]`}
+          className={`${baseClass} text-[#d8d8d8] border-l border-r border-[#e07a5f] px-3 py-0.5`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
+          style={{ maxWidth: "400px" }}
         >
-          <span className="text-[#e07a5f]">│</span>{" "}{paddedContent}{" "}<span className="text-[#e07a5f]">│</span>
+          {line.content}
         </motion.div>
       );
     }
     case "box-bottom":
       return (
         <motion.div
-          className={`${baseClass} text-[#e07a5f]`}
+          className={`${baseClass} text-[#e07a5f] border-b border-l border-r border-[#e07a5f] rounded-b px-2 py-1`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
+          style={{ maxWidth: "400px" }}
         >
-          └{"─".repeat(50)}┘
         </motion.div>
       );
     case "status-ok":

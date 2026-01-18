@@ -1470,7 +1470,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
         { type: "info", content: isKo
           ? "결국 핵심 질문은 하나입니다:"
-          : "The core question is one:", bullet: true },
+          : "Ultimately, the core question is just one:", bullet: true },
         { type: "success", content: isKo
           ? "\"지금, 이미 움직이고 있는가?\""
           : "\"Are they already moving, right now?\"" },

@@ -92,6 +92,61 @@ const VIBECAMP_ASCII = [
 // Subtitle for batch info (simple text, displayed below ASCII)
 const BATCH_SUBTITLE = "━━━ 1st Batch 2026: Seoul Edition ━━━";
 
+// Section ASCII art headers
+const ABOUT_ASCII = [
+  " █████╗ ██████╗  ██████╗ ██╗   ██╗████████╗",
+  "██╔══██╗██╔══██╗██╔═══██╗██║   ██║╚══██╔══╝",
+  "███████║██████╔╝██║   ██║██║   ██║   ██║   ",
+  "██╔══██║██╔══██╗██║   ██║██║   ██║   ██║   ",
+  "██║  ██║██████╔╝╚██████╔╝╚██████╔╝   ██║   ",
+  "╚═╝  ╚═╝╚═════╝  ╚═════╝  ╚═════╝    ╚═╝   ",
+];
+
+const WHO_ASCII = [
+  "██╗    ██╗██╗  ██╗ ██████╗ ",
+  "██║    ██║██║  ██║██╔═══██╗",
+  "██║ █╗ ██║███████║██║   ██║",
+  "██║███╗██║██╔══██║██║   ██║",
+  "╚███╔███╔╝██║  ██║╚██████╔╝",
+  " ╚══╝╚══╝ ╚═╝  ╚═╝ ╚═════╝ ",
+];
+
+const PROGRAM_ASCII = [
+  "██████╗ ██████╗  ██████╗  ██████╗ ██████╗  █████╗ ███╗   ███╗",
+  "██╔══██╗██╔══██╗██╔═══██╗██╔════╝ ██╔══██╗██╔══██╗████╗ ████║",
+  "██████╔╝██████╔╝██║   ██║██║  ███╗██████╔╝███████║██╔████╔██║",
+  "██╔═══╝ ██╔══██╗██║   ██║██║   ██║██╔══██╗██╔══██║██║╚██╔╝██║",
+  "██║     ██║  ██║╚██████╔╝╚██████╔╝██║  ██║██║  ██║██║ ╚═╝ ██║",
+  "╚═╝     ╚═╝  ╚═╝ ╚═════╝  ╚═════╝ ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝     ╚═╝",
+];
+
+const TIMELINE_ASCII = [
+  "████████╗██╗███╗   ███╗███████╗██╗     ██╗███╗   ██╗███████╗",
+  "╚══██╔══╝██║████╗ ████║██╔════╝██║     ██║████╗  ██║██╔════╝",
+  "   ██║   ██║██╔████╔██║█████╗  ██║     ██║██╔██╗ ██║█████╗  ",
+  "   ██║   ██║██║╚██╔╝██║██╔══╝  ██║     ██║██║╚██╗██║██╔══╝  ",
+  "   ██║   ██║██║ ╚═╝ ██║███████╗███████╗██║██║ ╚████║███████╗",
+  "   ╚═╝   ╚═╝╚═╝     ╚═╝╚══════╝╚══════╝╚═╝╚═╝  ╚═══╝╚══════╝",
+];
+
+const HASHED_SECTION_ASCII = [
+  "██╗  ██╗ █████╗ ███████╗██╗  ██╗███████╗██████╗ ",
+  "██║  ██║██╔══██╗██╔════╝██║  ██║██╔════╝██╔══██╗",
+  "███████║███████║███████╗███████║█████╗  ██║  ██║",
+  "██╔══██║██╔══██║╚════██║██╔══██║██╔══╝  ██║  ██║",
+  "██║  ██║██║  ██║███████║██║  ██║███████╗██████╔╝",
+  "╚═╝  ╚═╝╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝╚══════╝╚═════╝ ",
+];
+
+const APPLY_ASCII = [
+  " █████╗ ██████╗ ██████╗ ██╗  ██╗   ██╗",
+  "██╔══██╗██╔══██╗██╔══██╗██║  ╚██╗ ██╔╝",
+  "███████║██████╔╝██████╔╝██║   ╚████╔╝ ",
+  "██╔══██║██╔═══╝ ██╔═══╝ ██║    ╚██╔╝  ",
+  "██║  ██║██║     ██║     ███████╗██║   ",
+  "╚═╝  ╚═╝╚═╝     ╚═╝     ╚══════╝╚═╝   ",
+];
+
 // Section flow order
 const SECTION_ORDER = ["about", "who", "program", "timeline", "hashed", "apply"];
 
@@ -763,8 +818,13 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
   switch (sectionId) {
     // ========== /about: Vibe Camp 소개 (What is + Why Now) ==========
     case "about":
+      // ASCII art header
+      ABOUT_ASCII.forEach(line => {
+        lines.push({ type: "ascii", content: line });
+      });
       lines.push(
-        { type: "header", content: isKo ? "[ 01. VIBE CAMP이란? ]" : "[ 01. WHAT IS VIBE CAMP? ]" },
+        { type: "blank", content: "" },
+        { type: "dim", content: isKo ? "━━━ VIBE CAMP이란? ━━━" : "━━━ WHAT IS VIBE CAMP? ━━━" },
         { type: "blank", content: "" },
         { type: "output", content: isKo
           ? "Hashed Vibe Camp는 교육 프로그램이나 액셀러레이터가 아닙니다."
@@ -881,8 +941,13 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
 
     // ========== /who: 지원 대상 (Who Should Apply + Evaluation Criteria) ==========
     case "who":
+      // ASCII art header
+      WHO_ASCII.forEach(line => {
+        lines.push({ type: "ascii", content: line });
+      });
       lines.push(
-        { type: "header", content: isKo ? "[ 02. 누가 지원해야 할까요? ]" : "[ 02. WHO SHOULD APPLY? ]" },
+        { type: "blank", content: "" },
+        { type: "dim", content: isKo ? "━━━ 누가 지원해야 할까요? ━━━" : "━━━ WHO SHOULD APPLY? ━━━" },
         { type: "blank", content: "" },
         { type: "dim", content: isKo
           ? "Vibe Camp는 모든 창업자를 위한 프로그램이 아닙니다."
@@ -974,8 +1039,13 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
 
     // ========== /program: 프로그램 구조 ==========
     case "program":
+      // ASCII art header
+      PROGRAM_ASCII.forEach(line => {
+        lines.push({ type: "ascii", content: line });
+      });
       lines.push(
-        { type: "header", content: isKo ? "[ 03. 프로그램 구조 ]" : "[ 03. PROGRAM STRUCTURE ]" },
+        { type: "blank", content: "" },
+        { type: "dim", content: isKo ? "━━━ 프로그램 구조 ━━━" : "━━━ PROGRAM STRUCTURE ━━━" },
         { type: "blank", content: "" },
         { type: "dim", content: isKo
           ? "일회성 행사도, 강의 중심 프로그램도 아닙니다."
@@ -1026,8 +1096,13 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
 
     // ========== /timeline: 일정 ==========
     case "timeline":
+      // ASCII art header
+      TIMELINE_ASCII.forEach(line => {
+        lines.push({ type: "ascii", content: line });
+      });
       lines.push(
-        { type: "header", content: isKo ? "[ 04. 프로그램 일정 ]" : "[ 04. PROGRAM TIMELINE ]" },
+        { type: "blank", content: "" },
+        { type: "dim", content: isKo ? "━━━ 프로그램 일정 ━━━" : "━━━ PROGRAM TIMELINE ━━━" },
         { type: "dim", content: isKo ? "첫 번째 기수 Seoul Edition #1" : "First Cohort: Seoul Edition #1" },
         { type: "blank", content: "" },
         { type: "output", content: "1.30" },
@@ -1111,9 +1186,13 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
       break;
 
     case "hashed":
+      // ASCII art header
+      HASHED_SECTION_ASCII.forEach(line => {
+        lines.push({ type: "ascii", content: line });
+      });
       lines.push(
-        // Why Hashed?
-        { type: "header", content: isKo ? "[ 05. 왜 Hashed인가? ]" : "[ 05. WHY HASHED? ]" },
+        { type: "blank", content: "" },
+        { type: "dim", content: isKo ? "━━━ 왜 Hashed인가? ━━━" : "━━━ WHY HASHED? ━━━" },
         { type: "blank", content: "" },
         { type: "info", content: "200+ 포트폴리오  |  10+ 유니콘 배출  |  6 글로벌 거점" },
         { type: "blank", content: "" },
@@ -1246,9 +1325,13 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
       break;
 
     case "apply":
+      // ASCII art header
+      APPLY_ASCII.forEach(line => {
+        lines.push({ type: "ascii", content: line });
+      });
       lines.push(
-        // Investment Structure
-        { type: "header", content: isKo ? "[ 06. 투자 구조 ]" : "[ 06. INVESTMENT STRUCTURE ]" },
+        { type: "blank", content: "" },
+        { type: "dim", content: isKo ? "━━━ 지원하기 ━━━" : "━━━ APPLY NOW ━━━" },
         { type: "blank", content: "" },
         { type: "output", content: isKo ? "총 선발 팀 수" : "Total Selected Teams" },
         { type: "success", content: isKo ? "  → 3–5팀" : "  → 3-5 teams" },

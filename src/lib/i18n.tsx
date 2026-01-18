@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
 export type Language = "ko" | "en";
 
@@ -12,8 +12,30 @@ interface I18nContextType {
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
+// Detect browser language
+function detectBrowserLanguage(): Language {
+  if (typeof window === "undefined") return "ko";
+
+  const browserLang = navigator.language || (navigator as { userLanguage?: string }).userLanguage || "";
+  // Check if browser language starts with 'ko' (Korean)
+  if (browserLang.toLowerCase().startsWith("ko")) {
+    return "ko";
+  }
+  return "en";
+}
+
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [language, setLanguage] = useState<Language>("ko");
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  // Detect browser language on mount
+  useEffect(() => {
+    if (!isInitialized) {
+      const detectedLang = detectBrowserLanguage();
+      setLanguage(detectedLang);
+      setIsInitialized(true);
+    }
+  }, [isInitialized]);
 
   const t = (key: string): string => {
     const keys = key.split(".");

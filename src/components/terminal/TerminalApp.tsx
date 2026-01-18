@@ -888,6 +888,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
         return width;
       };
       const contentWidth = getDisplayWidth(line.content);
+      // Box is: │ + space + content(48) + space + │ = total width matches ─.repeat(50)
       const padding = Math.max(0, 48 - contentWidth);
       const paddedContent = line.content + " ".repeat(padding);
       return (
@@ -896,7 +897,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <span className="text-[#e07a5f]">│</span> {paddedContent} <span className="text-[#e07a5f]">│</span>
+          <span className="text-[#e07a5f]">│</span>{" "}{paddedContent}{" "}<span className="text-[#e07a5f]">│</span>
         </motion.div>
       );
     }

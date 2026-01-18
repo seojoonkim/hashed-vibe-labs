@@ -439,7 +439,7 @@ export default function TerminalApp() {
     : "Closed";
 
   return (
-    <div className={`h-screen bg-[#0d0d0d] text-[#e5e5e5] font-mono flex flex-col overflow-hidden ${isMobile ? 'p-1' : 'p-2'} ${isMobile ? 'text-xs' : 'text-sm'}`}>
+    <div className={`h-screen bg-[#0d0d0d] text-[#d8d8d8] font-mono flex flex-col overflow-hidden ${isMobile ? 'p-1' : 'p-2'} ${isMobile ? 'text-xs' : 'text-sm'}`}>
       {/* Terminal window with border */}
       <div className="flex-1 flex flex-col overflow-hidden overflow-x-hidden bg-[#1a1a1a] border border-[#333] rounded-lg">
       {/* Terminal Header - Fixed */}
@@ -480,7 +480,7 @@ export default function TerminalApp() {
               <div className="text-[#666] text-sm mb-4 space-y-1">
                 {heroStep >= 1 && (
                   <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                    <span className="text-[#27c93f]">$</span> ssh apply@vibecamp.hashed.com
+                    <span className="text-[#27c93f]">$</span> ssh vibecamp@hashed.com
                   </motion.div>
                 )}
                 {heroStep >= 2 && (
@@ -556,7 +556,7 @@ export default function TerminalApp() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.2 }}
-                      className="font-mono mt-3 text-xs sm:text-sm text-[#e5e5e5]"
+                      className="font-mono mt-3 text-xs sm:text-sm text-[#d8d8d8]"
                     >
                       <div>{isKo ? "아이디어가 아닌, 속도를 봅니다." : "We look at speed, not ideas."}</div>
                       <div>{isKo ? "설명이 아닌, 결과물을 봅니다." : "We look at output, not explanations."}</div>
@@ -744,7 +744,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "command":
       return (
         <motion.div
-          className={`${baseClass} text-[#e5e5e5]`}
+          className={`${baseClass} text-[#d8d8d8]`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
@@ -815,7 +815,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "list-item":
       return (
         <motion.div
-          className={`${baseClass} text-[#e5e5e5] flex items-start gap-2`}
+          className={`${baseClass} text-[#d8d8d8] flex items-start gap-2`}
           initial={{ opacity: 0, x: -5 }}
           animate={{ opacity: 1, x: 0 }}
         >
@@ -876,7 +876,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "box-content":
       return (
         <motion.div
-          className={`${baseClass} text-[#e5e5e5]`}
+          className={`${baseClass} text-[#d8d8d8]`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
@@ -901,7 +901,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
           animate={{ opacity: 1 }}
         >
           <span className="text-[#34d399]">[OK]</span>
-          <span className="text-[#e5e5e5]">{line.content}</span>
+          <span className="text-[#d8d8d8]">{line.content}</span>
         </motion.div>
       );
     case "status-info":
@@ -912,13 +912,13 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
           animate={{ opacity: 1 }}
         >
           <span className="text-[#22d3ee]">[INFO]</span>
-          <span className="text-[#e5e5e5]">{line.content}</span>
+          <span className="text-[#d8d8d8]">{line.content}</span>
         </motion.div>
       );
     default:
       return (
         <motion.div
-          className={`${baseClass} text-[#e5e5e5]`}
+          className={`${baseClass} text-[#d8d8d8]`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >

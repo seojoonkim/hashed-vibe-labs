@@ -873,16 +873,33 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
           ┌{"─".repeat(50)}┐
         </motion.div>
       );
-    case "box-content":
+    case "box-content": {
+      // Calculate display width (Korean/CJK characters count as 2)
+      const getDisplayWidth = (str: string) => {
+        let width = 0;
+        for (const char of str) {
+          // CJK characters, emojis take 2 spaces
+          if (/[\u3000-\u9fff\uac00-\ud7af\u{1F300}-\u{1F9FF}]/u.test(char)) {
+            width += 2;
+          } else {
+            width += 1;
+          }
+        }
+        return width;
+      };
+      const contentWidth = getDisplayWidth(line.content);
+      const padding = Math.max(0, 48 - contentWidth);
+      const paddedContent = line.content + " ".repeat(padding);
       return (
         <motion.div
           className={`${baseClass} text-[#d8d8d8]`}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
         >
-          <span className="text-[#e07a5f]">│</span> {line.content.padEnd(48)} <span className="text-[#e07a5f]">│</span>
+          <span className="text-[#e07a5f]">│</span> {paddedContent} <span className="text-[#e07a5f]">│</span>
         </motion.div>
       );
+    }
     case "box-bottom":
       return (
         <motion.div

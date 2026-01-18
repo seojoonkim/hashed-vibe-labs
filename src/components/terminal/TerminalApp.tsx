@@ -43,7 +43,7 @@ function useCountdown() {
 // Terminal line types
 interface TerminalLine {
   id: number;
-  type: "command" | "output" | "success" | "error" | "info" | "ascii" | "blank" | "header" | "list-item" | "divider" | "dim" | "link" | "blink";
+  type: "command" | "output" | "success" | "error" | "info" | "ascii" | "blank" | "header" | "list-item" | "divider" | "dim" | "link" | "blink" | "box-top" | "box-content" | "box-bottom" | "status-ok" | "status-info";
   content: string;
   indent?: number;
   href?: string;
@@ -863,6 +863,58 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
       );
     case "blank":
       return <div className="h-3" />;
+    case "box-top":
+      return (
+        <motion.div
+          className={`${baseClass} text-[#e07a5f]`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          ┌{"─".repeat(50)}┐
+        </motion.div>
+      );
+    case "box-content":
+      return (
+        <motion.div
+          className={`${baseClass} text-[#e5e5e5]`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <span className="text-[#e07a5f]">│</span> {line.content.padEnd(48)} <span className="text-[#e07a5f]">│</span>
+        </motion.div>
+      );
+    case "box-bottom":
+      return (
+        <motion.div
+          className={`${baseClass} text-[#e07a5f]`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          └{"─".repeat(50)}┘
+        </motion.div>
+      );
+    case "status-ok":
+      return (
+        <motion.div
+          className={`${baseClass} flex items-center gap-2`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <span className="text-[#34d399]">[OK]</span>
+          <span className="text-[#e5e5e5]">{line.content}</span>
+        </motion.div>
+      );
+    case "status-info":
+      return (
+        <motion.div
+          className={`${baseClass} flex items-center gap-2`}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+        >
+          <span className="text-[#22d3ee]">[INFO]</span>
+          <span className="text-[#e5e5e5]">{line.content}</span>
+        </motion.div>
+      );
     default:
       return (
         <motion.div
@@ -889,38 +941,71 @@ function LoadingSpinner({
   isMobile: boolean;
 }) {
   const [spinnerFrame, setSpinnerFrame] = useState(0);
+  const [progress, setProgress] = useState(0);
   const messages = LOADING_MESSAGES[sectionId];
   const langMessages = language === "ko" ? messages?.ko : messages?.en;
   const currentMessage = langMessages?.[messageIndex] || "";
-  const isDone = messageIndex === (langMessages?.length || 0) - 1;
+  const totalMessages = langMessages?.length || 1;
+  const isDone = messageIndex === totalMessages - 1;
 
   useEffect(() => {
-    if (isDone) return;
+    if (isDone) {
+      setProgress(100);
+      return;
+    }
     const interval = setInterval(() => {
       setSpinnerFrame((prev) => (prev + 1) % SPINNER_FRAMES.length);
     }, 80);
     return () => clearInterval(interval);
   }, [isDone]);
 
+  // Progress bar animation
+  useEffect(() => {
+    const targetProgress = ((messageIndex + 1) / totalMessages) * 100;
+    const timer = setInterval(() => {
+      setProgress((prev) => {
+        if (prev >= targetProgress) {
+          clearInterval(timer);
+          return targetProgress;
+        }
+        return prev + 2;
+      });
+    }, 20);
+    return () => clearInterval(timer);
+  }, [messageIndex, totalMessages]);
+
   const baseClass = `font-mono ${isMobile ? "text-xs" : "text-sm"} leading-relaxed`;
+
+  // Generate progress bar
+  const barLength = 20;
+  const filledLength = Math.round((progress / 100) * barLength);
+  const progressBar = "█".repeat(filledLength) + "░".repeat(barLength - filledLength);
 
   return (
     <motion.div
-      className={`${baseClass} flex items-center gap-2`}
+      className={`${baseClass} flex flex-col gap-1`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
     >
-      {isDone ? (
-        <>
-          <span className="text-[#34d399]">✓</span>
-          <span className="text-[#34d399]">{currentMessage}</span>
-        </>
-      ) : (
-        <>
-          <span className="text-[#e07a5f]">{SPINNER_FRAMES[spinnerFrame]}</span>
-          <span className="text-[#888]">{currentMessage}</span>
-        </>
+      <div className="flex items-center gap-2">
+        {isDone ? (
+          <>
+            <span className="text-[#34d399]">✓</span>
+            <span className="text-[#34d399]">{currentMessage}</span>
+          </>
+        ) : (
+          <>
+            <span className="text-[#e07a5f]">{SPINNER_FRAMES[spinnerFrame]}</span>
+            <span className="text-[#888]">{currentMessage}</span>
+          </>
+        )}
+      </div>
+      {!isDone && (
+        <div className="flex items-center gap-2 text-[#666]">
+          <span className="text-[#e07a5f]">[{progressBar}]</span>
+          <span>{Math.round(progress)}%</span>
+        </div>
       )}
     </motion.div>
   );
@@ -1449,39 +1534,39 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
         { type: "dim", content: isKo ? "━━━ 지원하기 ━━━" : "━━━ APPLY NOW ━━━" },
         { type: "blank", content: "" },
-        { type: "output", content: isKo ? "총 선발 팀 수" : "Total Selected Teams" },
-        { type: "success", content: isKo ? "  → 3–5팀" : "  → 3-5 teams" },
+
+        // Investment terms in a box
+        { type: "box-top", content: "" },
+        { type: "box-content", content: isKo ? "💰 투자 조건 (Investment Terms)" : "💰 Investment Terms" },
+        { type: "box-content", content: "" },
+        { type: "box-content", content: isKo
+          ? "  선발 팀 수    →  3-5팀"
+          : "  Teams         →  3-5 teams" },
+        { type: "box-content", content: isKo
+          ? "  초기 투자     →  1억원 / 지분 5%"
+          : "  Initial       →  100M KRW for 5% equity" },
+        { type: "box-content", content: isKo
+          ? "  추가 투자     →  최대 1억원 (협의)"
+          : "  Follow-on     →  Up to 100M KRW" },
+        { type: "box-content", content: isKo
+          ? "  투자 방식     →  Hashed 직접 투자"
+          : "  Method        →  Direct by Hashed" },
+        { type: "box-bottom", content: "" },
         { type: "blank", content: "" },
-        { type: "output", content: isKo ? "초기 투자" : "Initial Investment" },
-        { type: "success", content: isKo
-          ? "  → 선발 즉시 1억원 / 지분 5%"
-          : "  → 100M KRW for 5% equity upon selection" },
-        { type: "blank", content: "" },
-        { type: "output", content: isKo ? "추가 투자" : "Follow-on Investment" },
-        { type: "info", content: isKo
-          ? "  → 프로그램 기간 중 협의하에 최대 1억원 추가 가능"
-          : "  → Up to 100M KRW additional during program (by mutual agreement)" },
-        { type: "blank", content: "" },
-        { type: "output", content: isKo ? "투자 방식" : "Investment Method" },
-        { type: "success", content: isKo ? "  → Hashed 직접 투자" : "  → Direct investment by Hashed" },
-        { type: "blank", content: "" },
-        { type: "info", content: isKo
-          ? "★ 선발 = 투자 집행"
-          : "★ Selection = Investment execution" },
-        { type: "dim", content: isKo
-          ? "Vibe Camp는 투자를 전제로 설계된 프로그램입니다."
-          : "Vibe Camp is a program designed with investment in mind." },
+
+        { type: "status-ok", content: isKo
+          ? "선발 = 투자 집행 (선발 발표와 동시에 투자 확정)"
+          : "Selection = Investment (confirmed upon announcement)" },
         { type: "blank", content: "" },
         { type: "dim", content: "─".repeat(50) },
         { type: "blank", content: "" },
 
         // How to Apply
-        { type: "header", content: isKo ? "[ 06-2. 지원 방법 ]" : "[ 06-2. HOW TO APPLY ]" },
+        { type: "header", content: isKo ? "[ 지원 방법 ]" : "[ HOW TO APPLY ]" },
         { type: "blank", content: "" },
-        { type: "output", content: isKo ? "지원 대상" : "Who can apply" },
-        { type: "info", content: isKo ? "  개인 또는 3인 이하 팀" : "  Individuals or teams of 3 or less" },
+        { type: "status-info", content: isKo ? "지원 대상: 개인 또는 3인 이하 팀" : "Who: Individuals or teams of 3 or less" },
         { type: "blank", content: "" },
-        { type: "output", content: isKo ? "제출물" : "Submit" },
+        { type: "output", content: isKo ? "제출물:" : "Submit:" },
         { type: "list-item", content: isKo
           ? "현재 만들고 있는 것 (URL, demo, repo 등)"
           : "What you're building (URL, demo, repo, etc.)" },
@@ -1495,9 +1580,10 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
         { type: "dim", content: "─".repeat(50) },
         { type: "blank", content: "" },
-        { type: "success", content: isKo
-          ? "→ 지원하기: https://hashed.com/vibecamp"
-          : "→ Apply now: https://hashed.com/vibecamp" },
+        { type: "link", content: isKo
+          ? "→ 지원하기"
+          : "→ Apply now",
+          href: "https://hashed.com/vibecamp" },
         { type: "blank", content: "" },
         { type: "blink", content: isKo ? "Enter를 눌러 계속하세요..." : "Press Enter to continue..." },
         { type: "blank", content: "" },

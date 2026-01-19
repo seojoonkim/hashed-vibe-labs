@@ -1050,6 +1050,32 @@ export default function TerminalApp() {
                 </span>
               )}
             </span>
+            {/* Claude-style execute button */}
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                if (isMenuOpen) {
+                  handleCommand(MENU_COMMANDS[selectedMenuIndex].id);
+                } else {
+                  openMenu();
+                }
+              }}
+              className="ml-3 w-7 h-7 rounded-lg bg-[#e07a5f] hover:bg-[#c96a4f] transition-colors flex items-center justify-center flex-shrink-0"
+              title={isKo ? "실행" : "Execute"}
+            >
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="white"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M12 19V5M5 12l7-7 7 7" />
+              </svg>
+            </button>
           </div>
         </div>
       </div>

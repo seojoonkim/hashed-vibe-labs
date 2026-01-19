@@ -1028,7 +1028,7 @@ export default function TerminalApp() {
       {/* Input prompt - fixed at bottom */}
       <div
         ref={inputRef}
-        className="flex-shrink-0 bg-[#1a1a1a] cursor-pointer group rounded-b-lg"
+        className="flex-shrink-0 bg-[#1a1a1a] cursor-pointer group rounded-b-lg relative"
         onClick={() => openMenu()}
       >
         <div className={`${isMobile ? 'px-4' : 'max-w-[900px] mx-auto w-full px-6'} py-2`}>
@@ -1078,60 +1078,61 @@ export default function TerminalApp() {
             </button>
           </div>
         </div>
-      </div>
 
-      {/* Command Menu Dropdown */}
-      <AnimatePresence>
-        {isMenuOpen && (
-          <>
-            <motion.div
-              className="fixed inset-0 z-40 bg-black/50"
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              onClick={closeMenu}
-            />
-            <motion.div
-              className="fixed z-50 bg-[#333] border border-[#555] rounded overflow-hidden shadow-2xl"
-              style={{
-                left: Math.min(menuPosition.x, window.innerWidth - 300),
-                bottom: `${window.innerHeight - menuPosition.y}px`,
-                minWidth: "280px",
-                maxWidth: isMobile ? "calc(100vw - 32px)" : "400px"
-              }}
-              initial={{ opacity: 0, y: 10, scale: 0.95 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 10, scale: 0.95 }}
-              transition={{ duration: 0.15 }}
-            >
-              <div className="px-3 py-2 border-b border-[#555] text-xs text-[#888] flex justify-between items-center">
-                <span>{isKo ? "명령어 선택" : "Select Command"}</span>
-                <span className="text-[#666]">↑↓ {isKo ? "이동" : "nav"} · ↵ {isKo ? "선택" : "select"}</span>
-              </div>
-              {MENU_COMMANDS.map((cmd, index) => (
-                <motion.button
-                  key={cmd.id}
-                  className={`w-full px-3 py-2 text-left transition-colors flex items-center gap-3 ${
-                    index === selectedMenuIndex
-                      ? 'bg-[#e07a5f] text-white'
-                      : 'hover:bg-[#444]'
-                  }`}
-                  onClick={() => handleCommand(cmd.id)}
-                  onMouseEnter={() => setSelectedMenuIndex(index)}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.02 }}
-                >
-                  <span className={`text-sm ${index === selectedMenuIndex ? 'text-white' : 'text-[#e07a5f]'}`}>{cmd.command}</span>
-                  <span className={`text-sm ${index === selectedMenuIndex ? 'text-white/80' : 'text-[#999]'}`}>
-                    {isKo ? cmd.labelKo : cmd.label}
-                  </span>
-                </motion.button>
-              ))}
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
+        {/* Command Menu Dropdown */}
+        <AnimatePresence>
+          {isMenuOpen && (
+            <>
+              {/* Invisible click-away layer (no dim) */}
+              <div
+                className="fixed inset-0 z-40"
+                onClick={closeMenu}
+              />
+              <motion.div
+                className="absolute z-50 bg-[#333] border border-[#555] rounded overflow-hidden shadow-2xl"
+                style={{
+                  left: isMobile ? "16px" : "50%",
+                  right: isMobile ? "16px" : "auto",
+                  transform: isMobile ? "none" : "translateX(-50%)",
+                  bottom: "100%",
+                  marginBottom: "8px",
+                  minWidth: isMobile ? "auto" : "280px",
+                  maxWidth: isMobile ? "none" : "400px"
+                }}
+                initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                animate={{ opacity: 1, y: 0, scale: 1 }}
+                exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                transition={{ duration: 0.15 }}
+              >
+                <div className="px-3 py-2 border-b border-[#555] text-xs text-[#888] flex justify-between items-center">
+                  <span>{isKo ? "명령어 선택" : "Select Command"}</span>
+                  <span className="text-[#666]">↑↓ {isKo ? "이동" : "nav"} · ↵ {isKo ? "선택" : "select"}</span>
+                </div>
+                {MENU_COMMANDS.map((cmd, index) => (
+                  <motion.button
+                    key={cmd.id}
+                    className={`w-full px-3 py-2 text-left transition-colors flex items-center gap-3 ${
+                      index === selectedMenuIndex
+                        ? 'bg-[#e07a5f] text-white'
+                        : 'hover:bg-[#444]'
+                    }`}
+                    onClick={() => handleCommand(cmd.id)}
+                    onMouseEnter={() => setSelectedMenuIndex(index)}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.02 }}
+                  >
+                    <span className={`text-sm ${index === selectedMenuIndex ? 'text-white' : 'text-[#e07a5f]'}`}>{cmd.command}</span>
+                    <span className={`text-sm ${index === selectedMenuIndex ? 'text-white/80' : 'text-[#999]'}`}>
+                      {isKo ? cmd.labelKo : cmd.label}
+                    </span>
+                  </motion.button>
+                ))}
+              </motion.div>
+            </>
+          )}
+        </AnimatePresence>
+      </div>
       </motion.div>
     </div>
   );

@@ -12,14 +12,19 @@ interface I18nContextType {
 
 const I18nContext = createContext<I18nContextType | undefined>(undefined);
 
-// Detect browser language
+// Detect browser/OS language
 function detectBrowserLanguage(): Language {
   if (typeof window === "undefined") return "ko";
 
-  const browserLang = navigator.language || (navigator as { userLanguage?: string }).userLanguage || "";
-  // Check if browser language starts with 'ko' (Korean)
-  if (browserLang.toLowerCase().startsWith("ko")) {
-    return "ko";
+  // navigator.languages contains all preferred languages in order of preference
+  // This typically reflects OS language settings
+  const languages = navigator.languages || [navigator.language || (navigator as { userLanguage?: string }).userLanguage || ""];
+
+  // Check if any of the preferred languages is Korean
+  for (const lang of languages) {
+    if (lang.toLowerCase().startsWith("ko")) {
+      return "ko";
+    }
   }
   return "en";
 }

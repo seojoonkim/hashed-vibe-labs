@@ -302,7 +302,14 @@ export default function TerminalApp() {
   const openMenu = (initialIndex?: number) => {
     if (inputRef.current) {
       const rect = inputRef.current.getBoundingClientRect();
-      setMenuPosition({ x: rect.left, y: rect.top - 10 });
+      // Calculate x position to align with ">" symbol
+      // Desktop: max-w-900px centered + px-6 (24px) padding
+      // Mobile: px-4 (16px) padding
+      const containerWidth = Math.min(900, window.innerWidth);
+      const containerLeft = (window.innerWidth - containerWidth) / 2;
+      const paddingLeft = isMobile ? 16 : 24;
+      const xPos = isMobile ? rect.left + paddingLeft : containerLeft + paddingLeft;
+      setMenuPosition({ x: xPos, y: rect.top });
     }
     // Set to provided index or calculate next section index
     if (initialIndex !== undefined) {
@@ -851,8 +858,9 @@ export default function TerminalApp() {
               className="fixed z-50 bg-[#333] border border-[#555] rounded overflow-hidden shadow-2xl"
               style={{
                 left: Math.min(menuPosition.x, window.innerWidth - 300),
-                bottom: `calc(100vh - ${menuPosition.y}px)`,
-                minWidth: "280px"
+                bottom: `${window.innerHeight - menuPosition.y}px`,
+                minWidth: "280px",
+                maxWidth: isMobile ? "calc(100vw - 32px)" : "400px"
               }}
               initial={{ opacity: 0, y: 10, scale: 0.95 }}
               animate={{ opacity: 1, y: 0, scale: 1 }}

@@ -635,6 +635,17 @@ export default function TerminalApp() {
         return;
       }
 
+      // Number key shortcuts (1-9) - direct command execution without opening menu
+      if (/^[1-9]$/.test(e.key)) {
+        e.preventDefault();
+        const num = parseInt(e.key);
+        const matchingCommand = MENU_COMMANDS.find(cmd => cmd.command.startsWith(`[${num}]`));
+        if (matchingCommand) {
+          handleCommand(matchingCommand.id);
+        }
+        return;
+      }
+
       // Enter, Space, or / : Open menu with cursor on next section
       if (e.key === "Enter" || e.key === " " || e.key === "/") {
         e.preventDefault();
@@ -994,10 +1005,21 @@ export default function TerminalApp() {
             <span>MEM: 48MB</span>
             <span>CPU: 2%</span>
           </div>
-          <div className="flex items-center gap-3">
-            <span>UTF-8</span>
-            <span>LF</span>
-            <span>{isKo ? "한국어" : "English"}</span>
+          <div className="flex items-center">
+            <span className="text-[#555] mr-1">Language:</span>
+            <span
+              onClick={() => { setLanguage("ko"); resetTerminal(); }}
+              className={`cursor-pointer transition-colors ${isKo ? "text-[#aaa]" : "text-[#555] hover:text-[#777]"}`}
+            >
+              한국어
+            </span>
+            <span className="mx-1 text-[#444]">|</span>
+            <span
+              onClick={() => { setLanguage("en"); resetTerminal(); }}
+              className={`cursor-pointer transition-colors ${!isKo ? "text-[#aaa]" : "text-[#555] hover:text-[#777]"}`}
+            >
+              EN
+            </span>
           </div>
         </div>
       </div>
@@ -1027,17 +1049,6 @@ export default function TerminalApp() {
                 </span>
               )}
             </span>
-            {/* Language toggle button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                setLanguage(language === "ko" ? "en" : "ko");
-                resetTerminal();
-              }}
-              className="text-xs text-[#666] hover:text-[#999] transition-colors px-2 py-1 border border-[#444] rounded"
-            >
-              {language === "ko" ? "EN" : "KO"}
-            </button>
           </div>
         </div>
       </div>

@@ -546,11 +546,10 @@ export default function TerminalApp() {
         </div>
       </div>
 
-      {/* Scrollable content area - hide scrollbar */}
+      {/* Scrollable content area */}
       <div
-        className="overflow-y-auto overflow-x-hidden flex-1 hide-scrollbar"
+        className="overflow-y-auto overflow-x-hidden flex-1"
         ref={terminalBodyRef}
-        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         <div className={`${isMobile ? 'px-4' : 'max-w-[900px] mx-auto w-full px-6'} pt-6`}>
           {/* Hero Section - Claude Code Style */}

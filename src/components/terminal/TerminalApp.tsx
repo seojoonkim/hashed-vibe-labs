@@ -184,6 +184,10 @@ const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", 
 
 // Loading messages for each section
 const LOADING_MESSAGES: Record<string, { ko: string[]; en: string[] }> = {
+  home: {
+    ko: ["홈 데이터 로딩 중...", "환영 메시지 준비 중...", "완료!"],
+    en: ["Loading home data...", "Preparing welcome message...", "Done!"],
+  },
   about: {
     ko: ["데이터 로딩 중...", "Vibe Labs 정보 불러오는 중...", "완료!"],
     en: ["Loading data...", "Fetching Vibe Labs info...", "Done!"],
@@ -225,6 +229,7 @@ export default function TerminalApp() {
   const [currentSectionIndex, setCurrentSectionIndex] = useState(-1); // Track current section (-1 = hero)
   const [loadingState, setLoadingState] = useState<{ isLoading: boolean; sectionId: string; messageIndex: number } | null>(null);
   const [isThinking, setIsThinking] = useState(false); // "Thinking..." indicator before loading
+  const [heroLoadingStep, setHeroLoadingStep] = useState(0); // 0: not started, 1: thinking, 2: loading messages, 3: done
   const terminalBodyRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLDivElement>(null);
   const lineIdRef = useRef(0);
@@ -237,20 +242,33 @@ export default function TerminalApp() {
 
   const generateId = () => lineIdRef.current++;
 
-  // Scroll to bottom helper - use instant scroll on mobile for better UX
-  const scrollToBottom = useCallback((instant = false) => {
-    // Double requestAnimationFrame ensures DOM has updated
+  // Auto-scroll when lines change - ensures DOM is updated before scrolling
+  const prevLinesLengthRef = useRef(0);
+  useEffect(() => {
+    // Only scroll when lines are added (not removed)
+    if (lines.length > prevLinesLengthRef.current) {
+      if (terminalBodyRef.current) {
+        terminalBodyRef.current.scrollTo({
+          top: terminalBodyRef.current.scrollHeight,
+          behavior: "smooth"
+        });
+      }
+    }
+    prevLinesLengthRef.current = lines.length;
+  }, [lines.length]);
+
+  // Manual scroll helper for non-line-addition scrolls (loading states, etc.)
+  const scrollToBottom = useCallback(() => {
+    // Use requestAnimationFrame to ensure DOM has updated before scrolling
     requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        if (terminalBodyRef.current) {
-          terminalBodyRef.current.scrollTo({
-            top: terminalBodyRef.current.scrollHeight,
-            behavior: instant || isMobile ? "instant" : "smooth"
-          });
-        }
-      });
+      if (terminalBodyRef.current) {
+        terminalBodyRef.current.scrollTo({
+          top: terminalBodyRef.current.scrollHeight,
+          behavior: "smooth"
+        });
+      }
     });
-  }, [isMobile]);
+  }, []);
 
   // Add lines with typing effect
   const addLines = useCallback(async (newLines: Omit<TerminalLine, "id">[], delay = ANIMATION_SPEED) => {
@@ -267,11 +285,12 @@ export default function TerminalApp() {
       const line = newLines[i];
       const lineId = generateId();
 
-      // Add line with typing cursor
-      setLines(prev => [...prev, { ...line, id: lineId, isTyping: true }]);
-
-      // Scroll after state update - scrollToBottom uses double RAF internally
-      scrollToBottom();
+      // Add line with typing cursor, remove cursor from all previous lines
+      // Auto-scroll is handled by useEffect watching lines.length
+      setLines(prev => [
+        ...prev.map(l => ({ ...l, isTyping: false })),
+        { ...line, id: lineId, isTyping: true }
+      ]);
 
       await new Promise(resolve => setTimeout(resolve, delay));
 
@@ -283,12 +302,10 @@ export default function TerminalApp() {
         setIsTyping(false);
         return;
       }
-
-      // Remove typing cursor after delay
-      setLines(prev => prev.map(l => l.id === lineId ? { ...l, isTyping: false } : l));
     }
-    // Final scroll to ensure we're at the bottom
-    scrollToBottom();
+    // Remove cursor from the last line when done
+    setLines(prev => prev.map(l => ({ ...l, isTyping: false })));
+    // Auto-scroll is handled by useEffect, no manual scroll needed
     isTypingRef.current = false;
     setIsTyping(false);
   }, [scrollToBottom]);
@@ -298,6 +315,7 @@ export default function TerminalApp() {
     setLines([]);
     setShowHero(true);
     setHeroStep(0);
+    setHeroLoadingStep(0);
     setAsciiLineIndex(0);
     setTaglineIndex(0);
     setCurrentSectionIndex(-1);
@@ -361,24 +379,63 @@ export default function TerminalApp() {
     setIsMenuOpen(false);
   };
 
-  // Hero sequential animation
+  // Hero sequential animation (steps 0-3: ssh, connecting, connected+system, /home)
   useEffect(() => {
     if (!showHero || heroStep !== 0 || heroAnimatedRef.current) return;
     heroAnimatedRef.current = true;
 
-    const totalSteps = 6; // ssh, connecting, connected, welcome, ascii, login
     let step = 0;
 
     const animate = () => {
-      if (step <= totalSteps) {
+      if (step <= 3) { // Only animate up to step 3 (> [0] /home)
         setHeroStep(step);
         step++;
         setTimeout(animate, HERO_STEP_DELAY);
+      } else {
+        // After step 3, trigger hero loading animation
+        setHeroLoadingStep(1);
       }
     };
 
     setTimeout(animate, HERO_STEP_DELAY);
   }, [showHero, heroStep]);
+
+  // Hero loading animation (after > [0] /home is shown)
+  useEffect(() => {
+    if (heroLoadingStep === 0) return;
+
+    const messages = LOADING_MESSAGES.home;
+    const langMessages = language === "ko" ? messages.ko : messages.en;
+
+    const runLoading = async () => {
+      // Step 1: Show "Thinking..."
+      setIsThinking(true);
+      scrollToBottom();
+      await new Promise(resolve => setTimeout(resolve, ANIMATION_SPEED * 3));
+      setIsThinking(false);
+
+      // Step 2: Show loading messages
+      for (let i = 0; i < langMessages.length; i++) {
+        setLoadingState({ isLoading: true, sectionId: "home", messageIndex: i });
+        scrollToBottom();
+        const delay = i === langMessages.length - 1 ? ANIMATION_SPEED * 2 : ANIMATION_SPEED * 4;
+        await new Promise(resolve => setTimeout(resolve, delay));
+      }
+      setLoadingState(null);
+
+      // Step 3: Continue hero animation (step 4+)
+      setHeroLoadingStep(3);
+      setHeroStep(4);
+
+      // Continue remaining steps
+      setTimeout(() => setHeroStep(5), HERO_STEP_DELAY);
+      setTimeout(() => setHeroStep(6), HERO_STEP_DELAY * 2);
+    };
+
+    if (heroLoadingStep === 1) {
+      runLoading();
+    }
+  }, [heroLoadingStep, language, scrollToBottom]);
 
   // ASCII art line-by-line animation
   const totalAsciiLines = HASHED_ASCII.length + VIBELABS_ASCII.length;
@@ -389,12 +446,12 @@ export default function TerminalApp() {
 
     const timer = setTimeout(() => {
       setAsciiLineIndex(prev => prev + 1);
-      // Scroll on mobile as ASCII lines are added
-      if (isMobile) scrollToBottom();
+      // Scroll as ASCII lines are added
+      scrollToBottom();
     }, ASCII_LINE_DELAY);
 
     return () => clearTimeout(timer);
-  }, [heroStep, asciiLineIndex, totalAsciiLines, isMobile, scrollToBottom]);
+  }, [heroStep, asciiLineIndex, totalAsciiLines, scrollToBottom]);
 
   // Tagline line-by-line animation (after ASCII completes)
   useEffect(() => {
@@ -403,12 +460,12 @@ export default function TerminalApp() {
 
     const timer = setTimeout(() => {
       setTaglineIndex(prev => prev + 1);
-      // Scroll on mobile as taglines are added
-      if (isMobile) scrollToBottom();
+      // Scroll as taglines are added
+      scrollToBottom();
     }, ANIMATION_SPEED * 3); // Slower for readability
 
     return () => clearTimeout(timer);
-  }, [asciiLineIndex, taglineIndex, totalAsciiLines, isMobile, scrollToBottom]);
+  }, [asciiLineIndex, taglineIndex, totalAsciiLines, scrollToBottom]);
 
   // Show loading animation
   const showLoading = useCallback(async (sectionId: string): Promise<boolean> => {
@@ -597,9 +654,18 @@ export default function TerminalApp() {
     : "Closed";
 
   return (
-    <div className={`min-h-[100dvh] h-[100dvh] bg-[#0d0d0d] text-[#d8d8d8] font-mono flex flex-col overflow-hidden ${isMobile ? 'pb-[env(safe-area-inset-bottom)]' : 'p-2'} text-sm`}>
-      {/* Terminal window with border */}
-      <div className={`flex-1 flex flex-col overflow-hidden overflow-x-hidden bg-[#1a1a1a] ${isMobile ? '' : 'border border-[#333] rounded-lg'}`}>
+    <div className={`min-h-[100dvh] h-[100dvh] bg-[#0d0d0d] text-[#d8d8d8] font-mono flex flex-col overflow-hidden ${isMobile ? 'pb-[env(safe-area-inset-bottom)]' : 'p-[10px]'} text-sm relative`}>
+      <style jsx>{`
+        @keyframes glowPulse {
+          0%, 100% { box-shadow: 0 0 40px 10px rgba(224, 122, 95, 0.04), 0 0 80px 40px rgba(224, 122, 95, 0.02); }
+          50% { box-shadow: 0 0 50px 15px rgba(224, 122, 95, 0.08), 0 0 100px 50px rgba(224, 122, 95, 0.04); }
+        }
+      `}</style>
+      {/* Terminal window with border and glow effect */}
+      <div
+        className={`flex-1 flex flex-col overflow-hidden overflow-x-hidden bg-[#1a1a1a] ${isMobile ? '' : 'border border-[#333] rounded-lg'}`}
+        style={!isMobile ? { animation: 'glowPulse 4s ease-in-out infinite' } : undefined}
+      >
       {/* Terminal Header - Fixed */}
       <div className={`flex-shrink-0 bg-[#252525] border-b border-[#333] ${isMobile ? '' : 'rounded-t-lg'}`}>
         <div className={`${isMobile ? 'px-4' : 'max-w-[900px] mx-auto w-full px-6'} py-2 flex items-center justify-between`}>
@@ -663,6 +729,57 @@ export default function TerminalApp() {
                 )}
               </div>
 
+              {/* Blank line before [0] /home */}
+                {heroStep >= 3 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                    className="h-5"
+                  />
+                )}
+                {heroStep >= 3 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.4 }}
+                    className="text-[#888]"
+                  >
+                    <span className="text-[#27c93f]">{">"}</span> [0] /home
+                  </motion.div>
+                )}
+                {/* Blank line after [0] /home */}
+                {heroStep >= 4 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.05 }}
+                    className="h-5"
+                  />
+                )}
+                {heroStep >= 4 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    <span className="text-[#4ade80]">user@vibelabs</span>
+                    <span className="text-[#888]">:</span>
+                    <span className="text-[#60a5fa]">~</span>
+                    <span className="text-[#888]">$ </span>
+                    <span className="text-[#d8d8d8]">cat home.md</span>
+                  </motion.div>
+                )}
+                {/* Blank line after cat home.md */}
+                {heroStep >= 4 && (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    transition={{ delay: 0.15 }}
+                    className="h-5"
+                  />
+                )}
+
               {/* Welcome box border - salmon/coral color, 2px no rounded */}
               {heroStep >= 4 && (
                 <motion.div
@@ -672,8 +789,7 @@ export default function TerminalApp() {
                 >
                   <div className="flex items-center gap-2 text-[#e07a5f]">
                     <span>✱</span>
-                    <span>{isKo ? "환영합니다," : "Welcome to the"}</span>
-                    <span className="font-bold">Hashed Vibe Labs!</span>
+                    <span>where vibes become rocket products.</span>
                   </div>
                 </motion.div>
               )}
@@ -728,8 +844,10 @@ export default function TerminalApp() {
                         initial={{ opacity: 0, y: 4 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.2 }}
+                        className="flex items-start"
                       >
-                        {isKo ? "아이디어가 아닌, 속도를 봅니다." : "We look at speed, not ideas."}
+                        <span className="mr-2 flex-shrink-0 text-[#555]" style={{ fontSize: '0.45em', position: 'relative', top: '0.15em' }}>●</span>
+                        <span>{isKo ? "아이디어가 아닌, 속도를 봅니다." : "We look at speed, not ideas."}</span>
                       </motion.div>
                     )}
                     {taglineIndex >= 3 && (
@@ -738,8 +856,10 @@ export default function TerminalApp() {
                         initial={{ opacity: 0, y: 4 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.2 }}
+                        className="flex items-start"
                       >
-                        {isKo ? "설명이 아닌, 결과물을 봅니다." : "We look at output, not explanations."}
+                        <span className="mr-2 flex-shrink-0 text-[#555]" style={{ fontSize: '0.45em', position: 'relative', top: '0.15em' }}>●</span>
+                        <span>{isKo ? "설명이 아닌, 결과물을 봅니다." : "We look at output, not explanations."}</span>
                       </motion.div>
                     )}
                     {taglineIndex >= 4 && (
@@ -748,11 +868,12 @@ export default function TerminalApp() {
                         initial={{ opacity: 0, y: 4 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.2 }}
-                        className="mt-3"
+                        className="mt-3 flex items-start"
                       >
-                        {isKo
+                        <span className="mr-2 flex-shrink-0 text-[#555]" style={{ fontSize: '0.45em', position: 'relative', top: '0.15em' }}>●</span>
+                        <span>{isKo
                           ? "선발 즉시 5% 지분에 1억원 투자 + Hashed 및 계열사들의 모든 글로벌 네트워크와 리소스 지원"
-                          : "100M KRW for 5% equity upon selection + Full global network & resources of Hashed and its affiliates"}
+                          : "100M KRW for 5% equity upon selection + Full global network & resources of Hashed and its affiliates"}</span>
                       </motion.div>
                     )}
                     {taglineIndex >= 5 && (
@@ -761,10 +882,12 @@ export default function TerminalApp() {
                         initial={{ opacity: 0, y: 4 }}
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ duration: 0.2 }}
+                        className="flex items-start"
                       >
-                        {isKo
+                        <span className="mr-2 flex-shrink-0 text-[#555]" style={{ fontSize: '0.45em', position: 'relative', top: '0.15em' }}>●</span>
+                        <span>{isKo
                           ? "Claude 개발사 Anthropic 본사의 지원을 포함, 국내외 최고 수준의 바이브 코딩 개발자들이 멘토로 참여"
-                          : "Mentored by world-class vibe coders, with support from Anthropic (creators of Claude)"}
+                          : "Mentored by world-class vibe coders, with support from Anthropic (creators of Claude)"}</span>
                       </motion.div>
                     )}
                   </div>
@@ -818,8 +941,8 @@ export default function TerminalApp() {
                   transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
                   className="mb-4"
                 >
-                  <span className="text-[#808080]">
-                    {isKo ? "세션 시작됨. " : "Session started. Press "}<span className="text-white font-bold">Enter</span>{isKo ? "를 눌러 계속하세요" : " to continue"}
+                  <span className="text-[#4ade80]">
+                    {isKo ? "" : "Press "}<span className="font-bold">Enter</span>{isKo ? "를 눌러 계속하세요" : " to continue"}
                   </span>
                 </motion.div>
               )}
@@ -856,7 +979,7 @@ export default function TerminalApp() {
         )}
 
         {/* Bottom padding for fixed input */}
-        <div className="h-4" />
+        <div className="h-10" />
       </div>
       </div>
 
@@ -978,24 +1101,18 @@ function TypingCursor() {
     <motion.span
       className="inline-block w-[2px] h-[1em] bg-[#e07a5f] ml-[1px] align-middle"
       animate={{ opacity: [1, 1, 0, 0] }}
-      transition={{ duration: 0.8, repeat: Infinity, times: [0, 0.5, 0.5, 1] }}
+      transition={{ duration: 1.2, repeat: Infinity, times: [0, 0.5, 0.5, 1] }}
     />
   );
 }
 
-// Get bullet color based on line type (for paragraph headers only)
+// Get bullet color based on line type (header only gets Claude color)
 function getLineBulletColor(type: TerminalLine["type"]): string {
   switch (type) {
-    case "success":
-      return "#34d399"; // green
-    case "error":
-      return "#f87171"; // red
-    case "info":
-      return "#22d3ee"; // cyan
     case "header":
-      return "#e07a5f"; // orange
+      return "#e07a5f"; // Claude orange for section headers only
     default:
-      return "#777"; // default gray
+      return "#555"; // dark gray for all other content
   }
 }
 
@@ -1004,8 +1121,8 @@ function LineBullet({ type, visible }: { type: TerminalLine["type"]; visible?: b
   const color = getLineBulletColor(type);
   return (
     <span
-      className="mr-2 flex-shrink-0 text-[0.4em]"
-      style={{ color: visible === true ? color : 'transparent', verticalAlign: 'middle' }}
+      className="mr-2 flex-shrink-0"
+      style={{ color: visible === true ? color : 'transparent', fontSize: '0.45em', position: 'relative', top: '1.0em' }}
     >
       ●
     </span>
@@ -1020,11 +1137,11 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
   // Indented content class (for lines under paragraph headers)
   const indentedClass = "ml-5"; // matches bullet width + margin
 
-  // Animation props for better visibility on mobile
+  // Animation props - opacity only to prevent layout shifts during scroll
   const lineAnimation = {
-    initial: { opacity: 0, y: 4 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.15, ease: "easeOut" }
+    initial: { opacity: 0 },
+    animate: { opacity: 1 },
+    transition: { duration: 0.1, ease: "easeOut" }
   };
 
   switch (line.type) {
@@ -1055,7 +1172,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "success":
       return (
         <motion.div
-          className={`${baseClass} text-[#34d399] flex items-center`}
+          className={`${baseClass} text-[#34d399] flex items-start`}
           {...lineAnimation}
         >
           <LineBullet type={line.type} visible={line.bullet} />
@@ -1065,7 +1182,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "error":
       return (
         <motion.div
-          className={`${baseClass} text-[#f87171] flex items-center`}
+          className={`${baseClass} text-[#f87171] flex items-start`}
           {...lineAnimation}
         >
           <LineBullet type={line.type} visible={line.bullet} />
@@ -1075,7 +1192,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "info":
       return (
         <motion.div
-          className={`${baseClass} text-[#22d3ee] flex items-center`}
+          className={`${baseClass} text-[#22d3ee] flex items-start`}
           {...lineAnimation}
         >
           <LineBullet type={line.type} visible={line.bullet} />
@@ -1085,7 +1202,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "header":
       return (
         <motion.div
-          className={`${baseClass} text-[#e07a5f] font-bold flex items-center`}
+          className={`${baseClass} text-[#e07a5f] font-bold flex items-start`}
           {...lineAnimation}
         >
           <LineBullet type={line.type} visible={line.bullet} />
@@ -1096,7 +1213,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "output":
       return (
         <motion.div
-          className={`${baseClass} text-[#d8d8d8] flex items-center`}
+          className={`${baseClass} text-[#d8d8d8] flex items-start`}
           {...lineAnimation}
         >
           <LineBullet type={line.type} visible={line.bullet} />
@@ -1106,7 +1223,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "dim":
       return (
         <motion.div
-          className={`${baseClass} text-[#777] flex items-center`}
+          className={`${baseClass} text-[#777] flex items-start`}
           {...lineAnimation}
         >
           <LineBullet type={line.type} visible={line.bullet} />
@@ -1132,8 +1249,8 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.15, ease: "easeOut" }}
         >
-          <span style={{ color: bulletColor }}>•</span>
-          <span>{line.content}{showCursor && <TypingCursor />}</span>
+          <span className="flex-shrink-0" style={{ color: bulletColor, marginTop: '0.1em' }}>•</span>
+          <span className="flex-1">{line.content}{showCursor && <TypingCursor />}</span>
         </motion.div>
       );
     case "divider":
@@ -1302,7 +1419,7 @@ function LoadingSpinner({
 
   return (
     <motion.div
-      className={`${baseClass} flex flex-col gap-1`}
+      className={`${baseClass} flex flex-col gap-1 min-h-[48px]`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -1346,7 +1463,7 @@ function ThinkingIndicator({ language, isMobile }: { language: string; isMobile:
 
   return (
     <motion.div
-      className={`${baseClass} flex items-center gap-2`}
+      className={`${baseClass} flex items-center gap-2 min-h-[48px]`}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
@@ -1383,17 +1500,11 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
         // 단락 2: 무엇을 하는가
         { type: "output", content: isKo
-          ? "기존 스타트업의 완만한 성장 곡선과 달리, AI를 활용해"
-          : "Unlike traditional startups' gradual growth curves, we discover", bullet: true },
-        { type: "info", content: isKo
-          ? "압축적으로 성장하는 파운더를 매우 이른 단계에서 발굴합니다."
-          : "founders who grow exponentially with AI at a very early stage." },
+          ? "기존 스타트업의 완만한 성장 곡선과 달리, AI를 활용해 압축적으로 성장하는 파운더를 매우 이른 단계에서 발굴합니다."
+          : "Unlike traditional startups' gradual growth curves, we discover founders who grow exponentially with AI at a very early stage.", bullet: true },
         { type: "output", content: isKo
-          ? "확신이 서는 팀에는 즉시 투자하고,"
-          : "We invest immediately in teams we believe in," },
-        { type: "output", content: isKo
-          ? "약 8주간 밀도 높은 빌딩 과정을 함께합니다."
-          : "and join them for ~8 weeks of intensive building." },
+          ? "확신이 서는 팀에는 즉시 투자하고, 약 8주간 밀도 높은 빌딩 과정을 함께합니다."
+          : "We invest immediately in teams we believe in, and join them for ~8 weeks of intensive building." },
         { type: "blank", content: "" },
         // 단락 3: 핵심 요약
         { type: "success", content: isKo
@@ -1402,11 +1513,8 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
         // 단락 4: 평가 방식
         { type: "output", content: isKo
-          ? "피치덱보다 실제 움직임을 더 중요하게 봅니다."
-          : "We value actual movement more than pitch decks.", bullet: true },
-        { type: "info", content: isKo
-          ? "지금 만들고 있는 제품, 반복의 속도, 그리고 실제 결과물에 관심이 있습니다."
-          : "We're interested in products being built, iteration speed, and actual results." },
+          ? "피치덱보다 실제 움직임을 더 중요하게 봅니다. 지금 만들고 있는 제품, 반복의 속도, 그리고 실제 결과물에 관심이 있습니다."
+          : "We value actual movement more than pitch decks. We're interested in products being built, iteration speed, and actual results.", bullet: true },
         { type: "blank", content: "" },
         // 단락 5: X vs O 비교 (각각 독립 항목)
         { type: "error", content: isKo
@@ -1420,18 +1528,12 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
 
         // Why Now? 섹션
-        { type: "header", content: isKo ? "[ 1-2. 왜 지금인가? ]" : "[ 1-2. WHY NOW? ]", bullet: true },
+        { type: "header", content: isKo ? "1-2. 왜 지금인가?" : "1-2. WHY NOW?", bullet: true },
         { type: "blank", content: "" },
         // 단락 1: 도입 - 역삼각형 개념
         { type: "output", content: isKo
-          ? "과거의 개발 인재상이 '깊은 기술적 구현력'을 기반으로 한"
-          : "If the past ideal developer was a triangle (▲) based on", bullet: true },
-        { type: "output", content: isKo
-          ? "정삼각형(▲)이었다면, 바이브 코딩 시대의 인재는"
-          : "'deep technical implementation', the vibe coding era demands" },
-        { type: "success", content: isKo
-          ? "'넓은 비즈니스 커버리지'를 가진 역삼각형(▼)입니다."
-          : "an inverted triangle (▼) with 'wide business coverage'." },
+          ? "과거의 개발 인재상이 '깊은 기술적 구현력'을 기반으로 한 정삼각형(▲)이었다면, 바이브 코딩 시대의 인재는 '넓은 비즈니스 커버리지'를 가진 역삼각형(▼)입니다."
+          : "If the past ideal developer was a triangle (▲) based on 'deep technical implementation', the vibe coding era demands an inverted triangle (▼) with 'wide business coverage'.", bullet: true },
         { type: "blank", content: "" },
         { type: "info", content: isKo
           ? "이제 깊이는 AI가, 넓이는 인간이 담당합니다."
@@ -1450,36 +1552,26 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
         // YC 사례
         { type: "output", content: isKo
-          ? "Y Combinator 2025년 Winter 배치에서"
-          : "In Y Combinator's 2025 Winter batch,", bullet: true },
-        { type: "info", content: isKo
-          ? "25%의 스타트업이 코드베이스의 95%를 AI로 생성했습니다."
-          : "25% of startups generated 95% of their codebase with AI." },
+          ? "Y Combinator 2025년 Winter 배치에서 25%의 스타트업이 코드베이스의 95%를 AI로 생성했습니다."
+          : "In Y Combinator's 2025 Winter batch, 25% of startups generated 95% of their codebase with AI.", bullet: true },
         { type: "blank", content: "" },
         // YC CEO 인용
         { type: "dim", content: isKo
-          ? "\"50명, 100명의 엔지니어 팀이 필요 없다."
-          : "\"You don't need teams of 50 or 100 engineers.", bullet: true },
-        { type: "dim", content: isKo
-          ? "적게 모금해도 되고, 자본이 훨씬 오래간다.\""
-          : "You can raise less, and capital lasts much longer.\"" },
-        { type: "dim", content: "— Garry Tan, YC CEO" },
+          ? "\"50명, 100명의 엔지니어 팀이 필요 없다. 적게 모금해도 되고, 자본이 훨씬 오래간다.\" — Garry Tan, YC CEO"
+          : "\"You don't need teams of 50 or 100 engineers. You can raise less, and capital lasts much longer.\" — Garry Tan, YC CEO", bullet: true },
         { type: "blank", content: "" },
         // 핵심 메시지
         { type: "output", content: isKo
-          ? "'아이디어에서 실체화까지의 거리'가 근본적으로 바뀌었습니다."
-          : "The distance from 'idea to realization' has fundamentally changed.", bullet: true },
-        { type: "success", content: isKo
-          ? "설득 전에 증명이 가능한 시대입니다."
-          : "It's an era where you can prove before you persuade." },
+          ? "'아이디어에서 실체화까지의 거리'가 근본적으로 바뀌었습니다. 설득 전에 증명이 가능한 시대입니다."
+          : "The distance from 'idea to realization' has fundamentally changed. It's an era where you can prove before you persuade.", bullet: true },
         { type: "blank", content: "" },
         // 김서준 대표 포스팅 링크
         { type: "dim", content: isKo
           ? "📖 Hashed가 Vibe Labs를 기획한 배경에 대한 김서준(Simon Kim) 대표의 포스팅"
-          : "📖 Simon Kim's post on why Hashed launched Vibe Labs" },
+          : "📖 Simon Kim's post on why Hashed launched Vibe Labs", bullet: true },
         { type: "link", content: isKo
-          ? "   → 역삼각형 인재의 시대: 바이브 코딩이 창업과 투자의 문법을 바꾸다"
-          : "   → How Vibe Coding Is Rewriting the Rules of Startups and Venture Capital",
+          ? "→ 역삼각형 인재의 시대: 바이브 코딩이 창업과 투자의 문법을 바꾸다"
+          : "→ How Vibe Coding Is Rewriting the Rules of Startups and Venture Capital",
           href: isKo
             ? "https://medium.com/hashed-kr/vibe-founders-64f178fe5497"
             : "https://medium.com/hashed-official/vibe-founders-6c15649b78d4" },
@@ -1488,16 +1580,16 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
 
         // 2026 Batch Schedule 섹션
-        { type: "header", content: isKo ? "[ 1-3. 2026 배치 일정 ]" : "[ 1-3. 2026 BATCH SCHEDULE ]", bullet: true },
+        { type: "header", content: isKo ? "1-3. 2026 배치 일정" : "1-3. 2026 BATCH SCHEDULE", bullet: true },
         { type: "blank", content: "" },
         { type: "output", content: isKo
           ? "2026년에는 3개의 배치가 각 지역의 파트너 및 투자사들과 함께 진행됩니다."
           : "In 2026, three batches will run with local partners and investors." },
         { type: "blank", content: "" },
         // 배치 목록 (각각 독립 항목)
-        { type: "success", content: isKo ? "1st Batch · 서울 · 3월 시작" : "1st Batch · Seoul · March", bullet: true },
-        { type: "info", content: isKo ? "2nd Batch · 싱가포르 · 6월 시작" : "2nd Batch · Singapore · June", bullet: true },
-        { type: "info", content: isKo ? "3rd Batch · 아부다비 · 9월 시작" : "3rd Batch · Abu Dhabi · September", bullet: true },
+        { type: "success", content: isKo ? "1st Batch · 서울 Edition · 3월 시작" : "1st Batch · Seoul Edition · March", bullet: true },
+        { type: "info", content: isKo ? "2nd Batch · 싱가포르 Edition · 6월 시작" : "2nd Batch · Singapore Edition · June", bullet: true },
+        { type: "info", content: isKo ? "3rd Batch · 아부다비 Edition · 9월 시작" : "3rd Batch · Abu Dhabi Edition · September", bullet: true },
         { type: "blank", content: "" },
         { type: "blink", content: isKo ? "Enter를 눌러 계속하세요..." : "Press Enter to continue..." },
         { type: "blank", content: "" },
@@ -1518,20 +1610,11 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "header", content: isKo ? "2-1. 누가 지원해야 할까요?" : "2-1. WHO SHOULD APPLY?", bullet: true },
         { type: "blank", content: "" },
         { type: "output", content: isKo
-          ? "바이브 코딩 시대, 창업자의 역할이 달라지고 있다고 느낍니다."
-          : "In the vibe coding era, we see the founder's role changing.", bullet: true },
-        { type: "success", content: isKo
-          ? "'작가'에서 '편집장' 혹은 '영화감독'에 가까워지고 있습니다."
-          : "Moving from 'writer' to something closer to 'editor-in-chief' or 'film director'." },
+          ? "바이브 코딩 시대, 창업자의 역할이 달라지고 있다고 느낍니다. '작가'에서 '편집장' 혹은 '영화감독'에 가까워지고 있습니다."
+          : "In the vibe coding era, we see the founder's role changing. Moving from 'writer' to something closer to 'editor-in-chief' or 'film director'.", bullet: true },
         { type: "output", content: isKo
-          ? "AI가 쏟아내는 수많은 코드 조각 중에서,"
-          : "From the countless code fragments AI produces," },
-        { type: "output", content: isKo
-          ? "우리 브랜드의 톤앤매너에 맞는 컷을 골라내고 연결하는 안목."
-          : "selecting and connecting cuts that match your brand's tone." },
-        { type: "info", content: isKo
-          ? "그런 안목이 점점 더 중요해지고 있습니다."
-          : "That eye for quality is becoming increasingly important." },
+          ? "AI가 쏟아내는 수많은 코드 조각 중에서, 우리 브랜드의 톤앤매너에 맞는 컷을 골라내고 연결하는 안목. 그런 안목이 점점 더 중요해지고 있습니다."
+          : "From the countless code fragments AI produces, selecting and connecting cuts that match your brand's tone. That eye for quality is becoming increasingly important." },
         { type: "blank", content: "" },
         { type: "success", content: isKo ? "✓ 이런 분을 찾습니다:" : "✓ We're looking for:", bullet: true },
         { type: "list-item", content: isKo
@@ -1568,17 +1651,11 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
 
         // Evaluation Criteria
-        { type: "header", content: isKo ? "[ 2-2. 평가 기준 ]" : "[ 2-2. EVALUATION CRITERIA ]", bullet: true },
+        { type: "header", content: isKo ? "2-2. 평가 기준" : "2-2. EVALUATION CRITERIA", bullet: true },
         { type: "blank", content: "" },
         { type: "output", content: isKo
-          ? "기존 투자 심사 방식과 조금 다른 관점으로 팀을 보려고 합니다."
-          : "We try to look at teams from a slightly different perspective than traditional investment.", bullet: true },
-        { type: "output", content: isKo
-          ? "완성된 사업 계획서나 시장 분석도 의미가 있지만,"
-          : "Completed business plans and market analysis have their place, but" },
-        { type: "output", content: isKo
-          ? "지금 이 순간 어떻게 움직이고 있는지에 더 관심이 갑니다."
-          : "we're more drawn to how you're moving right now." },
+          ? "기존 투자 심사 방식과 조금 다른 관점으로 팀을 보려고 합니다. 완성된 사업 계획서나 시장 분석도 의미가 있지만, 지금 이 순간 어떻게 움직이고 있는지에 더 관심이 갑니다."
+          : "We try to look at teams from a slightly different perspective than traditional investment. Completed business plans and market analysis have their place, but we're more drawn to how you're moving right now.", bullet: true },
         { type: "blank", content: "" },
         { type: "error", content: isKo ? "크게 보지 않는 것:" : "What we don't focus on:", bullet: true },
         { type: "list-item", content: isKo ? "아이디어의 크기나 참신함" : "Size or novelty of the idea", bulletColor: "orange" },
@@ -1612,14 +1689,11 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "dim", content: "─".repeat(50) },
         { type: "blank", content: "" },
         // 가치의 재편 섹션
-        { type: "header", content: isKo ? "[ 2-3. 가치의 재편 ]" : "[ 2-3. THE SHIFT IN VALUE ]", bullet: true },
+        { type: "header", content: isKo ? "2-3. 가치의 재편" : "2-3. THE SHIFT IN VALUE", bullet: true },
         { type: "blank", content: "" },
         { type: "output", content: isKo
-          ? "코드와 단순 유틸리티 서비스의 가치가 빠르게 낮아지고 있습니다."
-          : "The value of code and simple utility services is declining rapidly.", bullet: true },
-        { type: "output", content: isKo
-          ? "이제 누구나 몇 시간 안에 'A를 B로 변환하는' 서비스를 만들 수 있게 되었습니다."
-          : "Anyone can now build 'convert A to B' services in just hours." },
+          ? "코드와 단순 유틸리티 서비스의 가치가 빠르게 낮아지고 있습니다. 이제 누구나 몇 시간 안에 'A를 B로 변환하는' 서비스를 만들 수 있게 되었습니다."
+          : "The value of code and simple utility services is declining rapidly. Anyone can now build 'convert A to B' services in just hours.", bullet: true },
         { type: "blank", content: "" },
         { type: "info", content: isKo
           ? "반면, 극적으로 중요해지는 것들이 있습니다:"
@@ -1657,11 +1731,8 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "header", content: isKo ? "3-1. 프로그램 구조" : "3-1. PROGRAM STRUCTURE", bullet: true },
         { type: "blank", content: "" },
         { type: "output", content: isKo
-          ? "일회성 행사나 강의 중심 프로그램과는 다른 방식을 시도합니다."
-          : "We're trying a different approach from one-time events or lecture-based programs.", bullet: true },
-        { type: "success", content: isKo
-          ? "선발과 동시에 투자가 집행되는 실전 빌딩 프로그램입니다."
-          : "A real building program where investment is executed upon selection." },
+          ? "일회성 행사나 강의 중심 프로그램과는 다른 방식을 시도합니다. 선발과 동시에 투자가 집행되는 실전 빌딩 프로그램입니다."
+          : "We're trying a different approach from one-time events or lecture-based programs. A real building program where investment is executed upon selection.", bullet: true },
         { type: "blank", content: "" },
 
         // Phase 1
@@ -1669,11 +1740,8 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "dim", content: "Meetup" },
         { type: "blank", content: "" },
         { type: "output", content: isKo
-          ? "본 프로그램 시작 전, 잠재 지원자들이 모이는 네트워킹 밋업입니다."
-          : "A networking meetup for potential applicants before the main program.", bullet: true },
-        { type: "output", content: isKo
-          ? "이 자리에서 Hashed 팀과 직접 만나고, 다른 빌더들과 교류할 수 있습니다."
-          : "Meet the Hashed team directly and network with other builders." },
+          ? "본 프로그램 시작 전, 잠재 지원자들이 모이는 네트워킹 밋업입니다. 이 자리에서 Hashed 팀과 직접 만나고, 다른 빌더들과 교류할 수 있습니다."
+          : "A networking meetup for potential applicants before the main program. Meet the Hashed team directly and network with other builders.", bullet: true },
         { type: "dim", content: isKo
           ? "※ 밋업 참여가 선발에 직접적인 영향을 주지는 않습니다."
           : "※ Meetup participation does not directly affect selection." },
@@ -1684,17 +1752,11 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "dim", content: isKo ? "Core Program · 약 8주" : "Core Program · ~8 weeks" },
         { type: "blank", content: "" },
         { type: "output", content: isKo
-          ? "최종 선발된 3–5팀이 참여하는 본 프로그램입니다."
-          : "The main program for 3-5 selected teams.", bullet: true },
-        { type: "success", content: isKo
-          ? "선발 발표와 동시에 Hashed가 직접 투자를 집행합니다."
-          : "Hashed executes direct investment upon selection announcement." },
+          ? "최종 선발된 3–5팀이 참여하는 본 프로그램입니다. 선발 발표와 동시에 Hashed가 직접 투자를 집행합니다."
+          : "The main program for 3-5 selected teams. Hashed executes direct investment upon selection announcement.", bullet: true },
         { type: "output", content: isKo
-          ? "약 8주간 각 팀의 빌드 속도와 제품 진화를 밀도 있게 관찰하고,"
-          : "Closely observe each team's build speed and product evolution for ~8 weeks," },
-        { type: "output", content: isKo
-          ? "필요한 순간에 Hashed의 네트워크와 리소스를 연결합니다."
-          : "connecting Hashed's network and resources when needed." },
+          ? "약 8주간 각 팀의 빌드 속도와 제품 진화를 밀도 있게 관찰하고, 필요한 순간에 Hashed의 네트워크와 리소스를 연결합니다."
+          : "Closely observe each team's build speed and product evolution for ~8 weeks, connecting Hashed's network and resources when needed." },
         { type: "blank", content: "" },
         { type: "blink", content: isKo ? "Enter를 눌러 계속하세요..." : "Press Enter to continue..." },
         { type: "blank", content: "" },
@@ -1712,7 +1774,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
       });
       lines.push(
         { type: "blank", content: "" },
-        { type: "header", content: isKo ? "[ 4-1. 프로그램 일정 ]" : "[ 4-1. PROGRAM TIMELINE ]", bullet: true },
+        { type: "header", content: isKo ? "4-1. 프로그램 일정" : "4-1. PROGRAM TIMELINE", bullet: true },
         { type: "dim", content: isKo ? "첫 번째 기수 Seoul Edition #1" : "First Cohort: Seoul Edition #1" },
         { type: "blank", content: "" },
         { type: "output", content: isKo ? "2026.01.30 (목)" : "Jan 30, 2026 (Thu)", bullet: true },
@@ -1735,7 +1797,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
 
         // Detailed Timeline
-        { type: "header", content: isKo ? "[ 4-2. 세부 일정 ]" : "[ 4-2. DETAILED SCHEDULE ]", bullet: true },
+        { type: "header", content: isKo ? "4-2. 세부 일정" : "4-2. DETAILED SCHEDULE", bullet: true },
         { type: "blank", content: "" },
         { type: "success", content: "1. Offline Entry Session (Seoul)", bullet: true },
         { type: "output", content: isKo ? "2026.01.30 (목)" : "Jan 30, 2026 (Thu)" },
@@ -1807,33 +1869,18 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
       });
       lines.push(
         { type: "blank", content: "" },
-        { type: "header", content: isKo ? "[ 5-1. 왜 Hashed인가? ]" : "[ 5-1. WHY HASHED? ]", bullet: true },
+        { type: "header", content: isKo ? "5-1. 왜 Hashed인가?" : "5-1. WHY HASHED?", bullet: true },
         { type: "blank", content: "" },
         { type: "info", content: "200+ 포트폴리오  |  10+ 유니콘 배출  |  6 글로벌 거점", bullet: true },
         { type: "blank", content: "" },
         { type: "output", content: isKo
-          ? "Hashed는 2017년 설립 이후, 기술 변화의 가장 앞선 지점에서"
-          : "Since 2017, Hashed has discovered teams at the forefront of", bullet: true },
-        { type: "output", content: isKo
-          ? "팀을 발굴해온 투자사입니다."
-          : "technology shifts." },
-        { type: "output", content: isKo
-          ? "Web3, AI, 컨텐츠 등 새로운 패러다임이 형성되는 초기 시점에"
-          : "At the early stages of new paradigms like Web3, AI, and content," },
-        { type: "output", content: isKo
-          ? "팀을 만나고, 함께 성장해왔습니다."
-          : "we've met teams and grown together." },
+          ? "Hashed는 2017년 설립 이후, 기술 변화의 가장 앞선 지점에서 팀을 발굴해온 투자사입니다. Web3, AI, 컨텐츠 등 새로운 패러다임이 형성되는 초기 시점에 팀을 만나고, 함께 성장해왔습니다."
+          : "Since 2017, Hashed has discovered teams at the forefront of technology shifts. At the early stages of new paradigms like Web3, AI, and content, we've met teams and grown together.", bullet: true },
         { type: "blank", content: "" },
         // Hashed Labs 2019 트랙레코드
         { type: "output", content: isKo
-          ? "2019년 초, 블록체인 게임 섹터를 대상으로 'Hashed Labs'라는"
-          : "In early 2019, we ran 'Hashed Labs'—a 3-month early-stage", bullet: true },
-        { type: "output", content: isKo
-          ? "3개월간의 초기투자 및 지원 프로그램을 운영했습니다."
-          : "investment program focused on blockchain gaming." },
-        { type: "success", content: isKo
-          ? "당시 5개 팀 중 2개가 유니콘이 되었습니다:"
-          : "2 out of 5 teams became unicorns:" },
+          ? "2019년 초, 블록체인 게임 섹터를 대상으로 'Hashed Labs'라는 3개월간의 초기투자 및 지원 프로그램을 운영했습니다. 당시 5개 팀 중 2개가 유니콘이 되었습니다:"
+          : "In early 2019, we ran 'Hashed Labs'—a 3-month early-stage investment program focused on blockchain gaming. 2 out of 5 teams became unicorns:", bullet: true },
         { type: "info", content: isKo
           ? "  · Sky Mavis (베트남) — Axie Infinity"
           : "  · Sky Mavis (Vietnam) — Axie Infinity" },
@@ -1857,30 +1904,18 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
           href: "https://www.youtube.com/watch?v=baCCOkq5ISo" },
         { type: "blank", content: "" },
         { type: "dim", content: isKo
-          ? "서울을 시작으로 샌프란시스코, 싱가포르, 방콕, 뱅갈루루, 아부다비에"
-          : "With offices in Seoul, San Francisco, Singapore, Bangkok, Bengaluru,", bullet: true },
-        { type: "dim", content: isKo
-          ? "오피스를 두고 있으며, 각 지역의 네트워크를 활용해"
-          : "and Abu Dhabi, we leverage our regional networks to help" },
-        { type: "dim", content: isKo
-          ? "포트폴리오 팀들의 글로벌 진출과 Go-to-Market을 지원합니다."
-          : "portfolio teams with global expansion and Go-to-Market strategies." },
+          ? "서울을 시작으로 샌프란시스코, 싱가포르, 방콕, 뱅갈루루, 아부다비에 오피스를 두고 있으며, 각 지역의 네트워크를 활용해 포트폴리오 팀들의 글로벌 진출과 Go-to-Market을 지원합니다."
+          : "With offices in Seoul, San Francisco, Singapore, Bangkok, Bengaluru, and Abu Dhabi, we leverage our regional networks to help portfolio teams with global expansion and Go-to-Market strategies.", bullet: true },
         { type: "blank", content: "" },
         { type: "info", content: isKo
-          ? "Vibe Labs는 그동안 축적해온 '초기 신호를 읽는 경험'을 정리한 프로그램입니다."
-          : "Vibe Labs is a program that organizes our experience of reading early signals.", bullet: true },
-        { type: "info", content: isKo
-          ? "말로 설득하기 전에 이미 움직이고 있는 팀을 찾고,"
-          : "Finding teams already moving before they persuade with words," },
-        { type: "info", content: isKo
-          ? "함께 빌딩하며 성장을 지원하고 싶습니다."
-          : "and supporting their growth by building together." },
+          ? "Vibe Labs는 그동안 축적해온 '초기 신호를 읽는 경험'을 정리한 프로그램입니다. 말로 설득하기 전에 이미 움직이고 있는 팀을 찾고, 함께 빌딩하며 성장을 지원하고 싶습니다."
+          : "Vibe Labs is a program that organizes our experience of reading early signals. Finding teams already moving before they persuade with words, and supporting their growth by building together.", bullet: true },
         { type: "blank", content: "" },
         { type: "dim", content: "─".repeat(50) },
         { type: "blank", content: "" },
 
         // Hashed as Vibe Coding Organization
-        { type: "header", content: isKo ? "[ 5-2. 자본가에서 슈퍼 커넥터로 ]" : "[ 5-2. FROM CAPITALIST TO SUPER CONNECTOR ]", bullet: true },
+        { type: "header", content: isKo ? "5-2. 자본가에서 슈퍼 커넥터로" : "5-2. FROM CAPITALIST TO SUPER CONNECTOR", bullet: true },
         { type: "blank", content: "" },
         { type: "output", content: isKo
           ? "자본이 풍부하고 개발 비용이 급격히 낮아진 세상에서, VC의 역할을 다시 생각하게 됩니다."
@@ -1907,24 +1942,15 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
 
         // Agentic VC
-        { type: "header", content: isKo ? "[ 5-3. Agentic VC로의 진화 ]" : "[ 5-3. EVOLUTION TO AGENTIC VC ]", bullet: true },
+        { type: "header", content: isKo ? "5-3. Agentic VC로의 진화" : "5-3. EVOLUTION TO AGENTIC VC", bullet: true },
         { type: "blank", content: "" },
         { type: "output", content: isKo
-          ? "Hashed는 대표부터 모든 파트너와 전 직원이 바이브 코딩을 학습하고"
-          : "At Hashed, from the CEO to all partners and staff, everyone learns vibe coding", bullet: true },
-        { type: "output", content: isKo
-          ? "실제 업무에 적용하고 있습니다."
-          : "and applies it to their daily work." },
+          ? "Hashed는 대표부터 모든 파트너와 전 직원이 바이브 코딩을 학습하고 실제 업무에 적용하고 있습니다."
+          : "At Hashed, from the CEO to all partners and staff, everyone learns vibe coding and applies it to their daily work.", bullet: true },
         { type: "blank", content: "" },
         { type: "info", content: isKo
-          ? "직접 빌딩해봐야 빌더를 더 잘 이해할 수 있다고 믿습니다."
-          : "We believe you understand builders better when you build yourself.", bullet: true },
-        { type: "output", content: isKo
-          ? "창업자가 'AI로 이틀 만에 MVP를 만들었는데 스케일링에서 막혔어요'라고 말할 때,"
-          : "When a founder says 'I made an MVP in 2 days with AI but hit a wall scaling,'" },
-        { type: "output", content: isKo
-          ? "같은 경험을 해본 사람과 그렇지 않은 사람의 대화는 질적으로 다릅니다."
-          : "the conversation is qualitatively different with someone who's been there." },
+          ? "직접 빌딩해봐야 빌더를 더 잘 이해할 수 있다고 믿습니다. 창업자가 'AI로 이틀 만에 MVP를 만들었는데 스케일링에서 막혔어요'라고 말할 때, 같은 경험을 해본 사람과 그렇지 않은 사람의 대화는 질적으로 다릅니다."
+          : "We believe you understand builders better when you build yourself. When a founder says 'I made an MVP in 2 days with AI but hit a wall scaling,' the conversation is qualitatively different with someone who's been there.", bullet: true },
         { type: "blank", content: "" },
         { type: "success", content: isKo ? "대표의 직접 바이브 코딩 사례:" : "CEO's Direct Vibe Coding Examples:", bullet: true },
         { type: "list-item", content: isKo
@@ -1938,14 +1964,11 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
 
         // Portfolio Distribution
-        { type: "header", content: isKo ? "[ 5-4. Hashed 포트폴리오 분포 ]" : "[ 5-4. HASHED PORTFOLIO DISTRIBUTION ]", bullet: true },
+        { type: "header", content: isKo ? "5-4. Hashed 포트폴리오 분포" : "5-4. HASHED PORTFOLIO DISTRIBUTION", bullet: true },
         { type: "blank", content: "" },
         { type: "dim", content: isKo
-          ? "전 세계 블록체인 프로젝트에 적극적으로 투자하고 있으며,"
-          : "Actively investing in blockchain projects worldwide,", bullet: true },
-        { type: "dim", content: isKo
-          ? "북미와 아시아에 집중하면서도 지리적 다양성을 유지하고 있습니다."
-          : "focusing on North America and Asia while maintaining geographic diversity." },
+          ? "전 세계 블록체인 프로젝트에 적극적으로 투자하고 있으며, 북미와 아시아에 집중하면서도 지리적 다양성을 유지하고 있습니다."
+          : "Actively investing in blockchain projects worldwide, focusing on North America and Asia while maintaining geographic diversity.", bullet: true },
         { type: "blank", content: "" },
         { type: "output", content: isKo ? "북미     ~70팀" : "North America   ~70 teams" },
         { type: "output", content: isKo ? "아시아   150+팀" : "Asia            150+ teams" },
@@ -1956,14 +1979,11 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
 
         // What Hashed Provides
-        { type: "header", content: isKo ? "[ 5-5. Hashed가 제공하는 것 ]" : "[ 5-5. WHAT HASHED PROVIDES ]", bullet: true },
+        { type: "header", content: isKo ? "5-5. Hashed가 제공하는 것" : "5-5. WHAT HASHED PROVIDES", bullet: true },
         { type: "blank", content: "" },
         { type: "dim", content: isKo
-          ? "일반적인 액셀러레이터의 강의나 멘토링 세션과는 조금 다른 접근입니다."
-          : "A slightly different approach from typical accelerator lectures or mentoring sessions.", bullet: true },
-        { type: "dim", content: isKo
-          ? "팀이 실제로 필요할 때, 필요한 것을 연결하려고 합니다."
-          : "We aim to connect what teams actually need, when they need it." },
+          ? "일반적인 액셀러레이터의 강의나 멘토링 세션과는 조금 다른 접근입니다. 팀이 실제로 필요할 때, 필요한 것을 연결하려고 합니다."
+          : "A slightly different approach from typical accelerator lectures or mentoring sessions. We aim to connect what teams actually need, when they need it.", bullet: true },
         { type: "blank", content: "" },
         { type: "success", content: isKo ? "1) 초기 투자 전문성" : "1) Early-stage Investment Expertise", bullet: true },
         { type: "list-item", content: isKo
@@ -2022,13 +2042,13 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
         { type: "dim", content: isKo
           ? "※ 정해진 커리큘럼이 아닌, 팀의 실제 진척과 필요에 따라 유연하게 지원"
-          : "※ Flexible support based on actual progress and needs, not fixed curriculum", bullet: true },
+          : "※ Flexible support based on actual progress and needs, not fixed curriculum" },
         { type: "blank", content: "" },
         { type: "dim", content: "─".repeat(50) },
         { type: "blank", content: "" },
 
         // Global Co-investors
-        { type: "header", content: isKo ? "[ 5-6. 글로벌 공동투자사 네트워크 ]" : "[ 5-6. GLOBAL CO-INVESTOR NETWORK ]", bullet: true },
+        { type: "header", content: isKo ? "5-6. 글로벌 공동투자사 네트워크" : "5-6. GLOBAL CO-INVESTOR NETWORK", bullet: true },
         { type: "blank", content: "" },
         { type: "dim", content: isKo
           ? "Hashed와 함께 딜플로우를 교환하고 공동투자해온 해외 투자사들:"
@@ -2058,7 +2078,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
       });
       lines.push(
         { type: "blank", content: "" },
-        { type: "header", content: isKo ? "[ 6-1. 투자 조건 ]" : "[ 6-1. INVESTMENT TERMS ]", bullet: true },
+        { type: "header", content: isKo ? "6-1. 투자 조건" : "6-1. INVESTMENT TERMS", bullet: true },
         { type: "blank", content: "" },
 
         // Investment terms in a box
@@ -2088,7 +2108,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
 
         // How to Apply
-        { type: "header", content: isKo ? "[ 6-2. 지원 방법 ]" : "[ 6-2. HOW TO APPLY ]", bullet: true },
+        { type: "header", content: isKo ? "6-2. 지원 방법" : "6-2. HOW TO APPLY", bullet: true },
         { type: "blank", content: "" },
         { type: "status-info", content: isKo ? "지원 대상: 개인 또는 3인 이하 팀" : "Who: Individuals or teams of 3 or less", bullet: true },
         { type: "blank", content: "" },

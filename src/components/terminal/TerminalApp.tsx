@@ -6,9 +6,9 @@ import { useI18n } from "@/lib/i18n";
 import { PROGRAM_DATA } from "@/lib/constants";
 
 // Animation timing constants (all in ms)
-const ANIMATION_SPEED = 98; // Base speed for text lines (20% faster)
-const HERO_STEP_DELAY = 540; // Delay between hero animation steps (20% faster)
-const ASCII_LINE_DELAY = 76; // Delay per ASCII art line (20% faster)
+const ANIMATION_SPEED = 118; // Base speed for text lines
+const HERO_STEP_DELAY = 648; // Delay between hero animation steps
+const ASCII_LINE_DELAY = 91; // Delay per ASCII art line
 
 // Application deadline: February 19, 2026, 23:59:59 KST
 const DEADLINE = new Date("2026-02-19T23:59:59+09:00").getTime();
@@ -70,7 +70,7 @@ const BULLET_COLORS: Record<BulletColor, string> = {
 // Terminal line types
 interface TerminalLine {
   id: number;
-  type: "command" | "output" | "success" | "error" | "info" | "ascii" | "blank" | "header" | "list-item" | "divider" | "dim" | "link" | "blink" | "box-top" | "box-content" | "box-bottom" | "status-ok" | "status-info" | "system" | "prompt";
+  type: "command" | "output" | "success" | "error" | "info" | "ascii" | "blank" | "header" | "list-item" | "divider" | "dim" | "link" | "blink" | "box-top" | "box-content" | "box-bottom" | "status-ok" | "status-info" | "system" | "prompt" | "countdown";
   content: string;
   indent?: number;
   href?: string;
@@ -220,7 +220,7 @@ export default function TerminalApp() {
   const [lines, setLines] = useState<TerminalLine[]>([]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
-  const [selectedMenuIndex, setSelectedMenuIndex] = useState(0);
+  const [selectedMenuIndex, setSelectedMenuIndex] = useState(1); // Start at 1 since hero is [0]
   const [showHero, setShowHero] = useState(true);
   const [isTyping, setIsTyping] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
@@ -251,7 +251,7 @@ export default function TerminalApp() {
       if (terminalBodyRef.current) {
         terminalBodyRef.current.scrollTo({
           top: terminalBodyRef.current.scrollHeight,
-          behavior: "smooth"
+          behavior: "instant"
         });
       }
     }
@@ -267,7 +267,7 @@ export default function TerminalApp() {
         const offset = isMobile ? 80 : 0;
         terminalBodyRef.current.scrollTo({
           top: terminalBodyRef.current.scrollHeight - offset,
-          behavior: "smooth"
+          behavior: "instant"
         });
       }
     });
@@ -386,6 +386,7 @@ export default function TerminalApp() {
   useEffect(() => {
     if (!showHero || heroStep !== 0 || heroAnimatedRef.current) return;
     heroAnimatedRef.current = true;
+    setIsTyping(true); // Show "Processing..." during hero animation
 
     let step = 0;
 
@@ -459,7 +460,11 @@ export default function TerminalApp() {
   // Tagline line-by-line animation (after ASCII completes)
   useEffect(() => {
     if (asciiLineIndex < totalAsciiLines) return;
-    if (taglineIndex >= totalTaglines) return;
+    if (taglineIndex >= totalTaglines) {
+      // Hero animation complete
+      setIsTyping(false);
+      return;
+    }
 
     const timer = setTimeout(() => {
       setTaglineIndex(prev => prev + 1);
@@ -468,7 +473,7 @@ export default function TerminalApp() {
     }, ANIMATION_SPEED * 3); // Slower for readability
 
     return () => clearTimeout(timer);
-  }, [asciiLineIndex, taglineIndex, totalAsciiLines, scrollToBottom]);
+  }, [asciiLineIndex, taglineIndex, totalAsciiLines, totalTaglines, scrollToBottom]);
 
   // Show loading animation
   const showLoading = useCallback(async (sectionId: string): Promise<boolean> => {
@@ -590,6 +595,22 @@ export default function TerminalApp() {
     // Get section content
     const sectionLines = getSectionContent(commandId, language);
     await addLines(sectionLines, ANIMATION_SPEED);
+
+    // Update selectedMenuIndex to point to the next section for the status bar hint
+    const currentIdx = SECTION_ORDER.indexOf(commandId);
+    if (currentIdx !== -1) {
+      if (currentIdx + 1 < SECTION_ORDER.length) {
+        // More sections to go - point to next section
+        const nextSectionId = SECTION_ORDER[currentIdx + 1];
+        const nextMenuIndex = MENU_COMMANDS.findIndex(c => c.id === nextSectionId);
+        if (nextMenuIndex !== -1) {
+          setSelectedMenuIndex(nextMenuIndex);
+        }
+      } else {
+        // Last section completed - point to [0] /home
+        setSelectedMenuIndex(0);
+      }
+    }
   };
 
   // Handle keyboard shortcuts
@@ -711,6 +732,8 @@ export default function TerminalApp() {
       <div
         className="overflow-y-auto overflow-x-hidden flex-1"
         ref={terminalBodyRef}
+        style={{ overflowAnchor: "none" }}
+        onClick={() => isMenuOpen && closeMenu()}
       >
         <div className={`${isMobile ? 'px-4' : 'max-w-[900px] mx-auto w-full px-6'} pt-6`}>
           {/* Hero Section - Claude Code Style */}
@@ -996,16 +1019,19 @@ export default function TerminalApp() {
 
         {/* Bottom padding for fixed input */}
         <div className="h-10" />
+        {/* Scroll anchor - keeps scroll pinned to bottom */}
+        <div style={{ overflowAnchor: "auto", height: "1px" }} />
         </div>
       </div>
 
       {/* Status bar - terminal metrics */}
-      <div className="flex-shrink-0 bg-[#1a1a1a] px-3 border-t border-[#333]">
-        <div className={`${isMobile ? '' : 'max-w-[900px] mx-auto w-full'} flex items-center justify-between text-[10px] text-[#555]`}>
+      <div className="flex-shrink-0 bg-[#1a1a1a] border-t border-[#333]">
+        <div className={`${isMobile ? 'px-4' : 'max-w-[900px] mx-auto w-full px-6'} flex items-center text-[10px] text-[#555]`}>
           <div className="flex items-center gap-3">
             <span>MEM: 48MB</span>
             <span>CPU: 2%</span>
           </div>
+          <div className="flex-1" />
           <div className="flex items-center">
             <span className="text-[#555] mr-1">Language:</span>
             <span
@@ -1022,6 +1048,8 @@ export default function TerminalApp() {
               EN
             </span>
           </div>
+          {/* Spacer to align with execute button below */}
+          <div className="ml-3 w-7 flex-shrink-0" />
         </div>
       </div>
 
@@ -1046,92 +1074,100 @@ export default function TerminalApp() {
                 </span>
               ) : (
                 <span className="text-[#888]">
-                  {isKo ? '명령어를 입력하세요...' : 'Type a command...'}
+                  {isKo ? "명령어를 입력하세요... 다음 컨텐츠는 " : "Enter command... Next: "}{MENU_COMMANDS[selectedMenuIndex]?.command} {isKo ? MENU_COMMANDS[selectedMenuIndex]?.labelKo : MENU_COMMANDS[selectedMenuIndex]?.label}
                 </span>
               )}
             </span>
-            {/* Claude-style execute button */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
-                if (isMenuOpen) {
-                  handleCommand(MENU_COMMANDS[selectedMenuIndex].id);
-                } else {
-                  openMenu();
-                }
-              }}
-              className="ml-3 w-7 h-7 rounded-lg bg-[#e07a5f] hover:bg-[#c96a4f] transition-colors flex items-center justify-center flex-shrink-0"
-              title={isKo ? "실행" : "Execute"}
-            >
-              <svg
-                width="14"
-                height="14"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="white"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
+            {/* Claude-style execute button with menu */}
+            <div className="relative ml-3 flex-shrink-0">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (isMenuOpen) {
+                    handleCommand(MENU_COMMANDS[selectedMenuIndex].id);
+                  } else {
+                    openMenu();
+                  }
+                }}
+                className="w-7 h-7 rounded-lg bg-[#e07a5f] hover:bg-[#c96a4f] transition-colors flex items-center justify-center"
+                title={isKo ? "실행" : "Execute"}
               >
-                <path d="M12 19V5M5 12l7-7 7 7" />
-              </svg>
-            </button>
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="white"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M9 10l-5 5 5 5" />
+                  <path d="M4 15h11a4 4 0 0 0 4-4V5" />
+                </svg>
+              </button>
+
+              {/* Invisible click-away layer (no dim) - outside AnimatePresence */}
+              {isMenuOpen && (
+                <div
+                  className="fixed inset-0"
+                  style={{ zIndex: 9998 }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    closeMenu();
+                  }}
+                />
+              )}
+
+              {/* Command Menu Dropdown */}
+              <AnimatePresence>
+                {isMenuOpen && (
+                  <motion.div
+                      className="absolute bg-[#333] border border-[#555] rounded overflow-hidden shadow-2xl"
+                      style={{
+                        zIndex: 9999,
+                        right: isMobile ? "-16px" : "0",
+                        left: isMobile ? "-16px" : "auto",
+                        bottom: "100%",
+                        marginBottom: "36px",
+                        minWidth: isMobile ? "auto" : "280px",
+                        maxWidth: isMobile ? "none" : "400px"
+                      }}
+                      initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                      animate={{ opacity: 1, y: 0, scale: 1 }}
+                      exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                      transition={{ duration: 0.15 }}
+                    >
+                      <div className="px-3 py-2 border-b border-[#555] text-xs text-[#888] flex justify-between items-center">
+                        <span>{isKo ? "명령어 선택" : "Select Command"}</span>
+                        <span className="text-[#666]">↑↓ {isKo ? "이동" : "nav"} · ↵ {isKo ? "선택" : "select"}</span>
+                      </div>
+                      {MENU_COMMANDS.map((cmd, index) => (
+                        <motion.button
+                          key={cmd.id}
+                          className={`w-full px-3 py-2 text-left transition-colors flex items-center gap-3 ${
+                            index === selectedMenuIndex
+                              ? 'bg-[#e07a5f] text-white'
+                              : 'hover:bg-[#444]'
+                          }`}
+                          onClick={() => handleCommand(cmd.id)}
+                          onMouseEnter={() => setSelectedMenuIndex(index)}
+                          initial={{ opacity: 0, x: -10 }}
+                          animate={{ opacity: 1, x: 0 }}
+                          transition={{ delay: index * 0.02 }}
+                        >
+                          <span className={`text-sm ${index === selectedMenuIndex ? 'text-white' : 'text-[#e07a5f]'}`}>{cmd.command}</span>
+                          <span className={`text-sm ${index === selectedMenuIndex ? 'text-white/80' : 'text-[#999]'}`}>
+                            {isKo ? cmd.labelKo : cmd.label}
+                          </span>
+                        </motion.button>
+                      ))}
+                    </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </div>
         </div>
-
-        {/* Command Menu Dropdown */}
-        <AnimatePresence>
-          {isMenuOpen && (
-            <>
-              {/* Invisible click-away layer (no dim) */}
-              <div
-                className="fixed inset-0 z-40"
-                onClick={closeMenu}
-              />
-              <motion.div
-                className="absolute z-50 bg-[#333] border border-[#555] rounded overflow-hidden shadow-2xl"
-                style={{
-                  left: isMobile ? "16px" : "50%",
-                  right: isMobile ? "16px" : "auto",
-                  transform: isMobile ? "none" : "translateX(-50%)",
-                  bottom: "100%",
-                  marginBottom: "8px",
-                  minWidth: isMobile ? "auto" : "280px",
-                  maxWidth: isMobile ? "none" : "400px"
-                }}
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                transition={{ duration: 0.15 }}
-              >
-                <div className="px-3 py-2 border-b border-[#555] text-xs text-[#888] flex justify-between items-center">
-                  <span>{isKo ? "명령어 선택" : "Select Command"}</span>
-                  <span className="text-[#666]">↑↓ {isKo ? "이동" : "nav"} · ↵ {isKo ? "선택" : "select"}</span>
-                </div>
-                {MENU_COMMANDS.map((cmd, index) => (
-                  <motion.button
-                    key={cmd.id}
-                    className={`w-full px-3 py-2 text-left transition-colors flex items-center gap-3 ${
-                      index === selectedMenuIndex
-                        ? 'bg-[#e07a5f] text-white'
-                        : 'hover:bg-[#444]'
-                    }`}
-                    onClick={() => handleCommand(cmd.id)}
-                    onMouseEnter={() => setSelectedMenuIndex(index)}
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: index * 0.02 }}
-                  >
-                    <span className={`text-sm ${index === selectedMenuIndex ? 'text-white' : 'text-[#e07a5f]'}`}>{cmd.command}</span>
-                    <span className={`text-sm ${index === selectedMenuIndex ? 'text-white/80' : 'text-[#999]'}`}>
-                      {isKo ? cmd.labelKo : cmd.label}
-                    </span>
-                  </motion.button>
-                ))}
-              </motion.div>
-            </>
-          )}
-        </AnimatePresence>
       </div>
       </motion.div>
     </div>
@@ -1146,6 +1182,60 @@ function TypingCursor() {
       animate={{ opacity: [1, 1, 0, 0] }}
       transition={{ duration: 1.2, repeat: Infinity, times: [0, 0.5, 0.5, 1] }}
     />
+  );
+}
+
+// Countdown component for deadline timer
+function CountdownTimer({ targetDate, isKo }: { targetDate: Date; isKo: boolean }) {
+  const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0, expired: false });
+
+  useEffect(() => {
+    const calculateTimeLeft = () => {
+      const now = new Date();
+      const difference = targetDate.getTime() - now.getTime();
+
+      if (difference <= 0) {
+        return { days: 0, hours: 0, minutes: 0, seconds: 0, expired: true };
+      }
+
+      return {
+        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
+        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
+        minutes: Math.floor((difference / (1000 * 60)) % 60),
+        seconds: Math.floor((difference / 1000) % 60),
+        expired: false
+      };
+    };
+
+    setTimeLeft(calculateTimeLeft());
+    const timer = setInterval(() => {
+      setTimeLeft(calculateTimeLeft());
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [targetDate]);
+
+  if (timeLeft.expired) {
+    return (
+      <span className="text-[#f87171]">
+        {isKo ? "지원 마감됨" : "Application Closed"}
+      </span>
+    );
+  }
+
+  const pad = (n: number) => n.toString().padStart(2, '0');
+
+  return (
+    <span className="font-mono text-white">
+      {timeLeft.days}
+      <span className="text-[#777]">{isKo ? "일 " : "d "}</span>
+      {pad(timeLeft.hours)}
+      <span className="text-[#777]">{isKo ? "시 " : "h "}</span>
+      {pad(timeLeft.minutes)}
+      <span className="text-[#777]">{isKo ? "분 " : "m "}</span>
+      {pad(timeLeft.seconds)}
+      <span className="text-[#777]">{isKo ? "초" : "s"}</span>
+    </span>
   );
 }
 
@@ -1264,13 +1354,28 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
         </motion.div>
       );
     case "dim":
+      const dimLink = (line as { link?: string }).link;
       return (
         <motion.div
           className={`${baseClass} text-[#777] flex items-start`}
           {...lineAnimation}
         >
           <LineBullet type={line.type} visible={line.bullet} />
-          <span>{line.content}{showCursor && <TypingCursor />}</span>
+          <span>
+            {dimLink ? (
+              <a
+                href={dimLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[#e07a5f] hover:underline transition-colors cursor-pointer"
+              >
+                {line.content}
+              </a>
+            ) : (
+              line.content
+            )}
+            {showCursor && <TypingCursor />}
+          </span>
         </motion.div>
       );
     case "ascii":
@@ -1284,7 +1389,9 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
         </motion.div>
       );
     case "list-item":
-      const bulletColor = "#d8d8d8"; // Use body text color for all bullets
+      const listBulletColor = "#d8d8d8"; // Use body text color for all bullets
+      const bulletChar = (line as { bulletChar?: string }).bulletChar || "•";
+      const listItemLink = (line as { link?: string }).link;
       return (
         <motion.div
           className={`${baseClass} text-[#d8d8d8] ${indentedClass} flex items-start gap-2`}
@@ -1292,8 +1399,22 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.15, ease: "easeOut" }}
         >
-          <span className="flex-shrink-0" style={{ color: bulletColor, marginTop: '0.1em' }}>•</span>
-          <span className="flex-1">{line.content}{showCursor && <TypingCursor />}</span>
+          <span className="flex-shrink-0" style={{ color: listBulletColor, marginTop: '0.1em' }}>{bulletChar}</span>
+          <span className="flex-1">
+            {listItemLink ? (
+              <a
+                href={listItemLink}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-[#e07a5f] hover:underline transition-colors cursor-pointer"
+              >
+                {line.content}
+              </a>
+            ) : (
+              line.content
+            )}
+            {showCursor && <TypingCursor />}
+          </span>
         </motion.div>
       );
     case "divider":
@@ -1392,6 +1513,22 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
           {...lineAnimation}
         >
           <span className="text-[#888]">[system]</span> {line.content}{showCursor && <TypingCursor />}
+        </motion.div>
+      );
+    case "countdown":
+      // Parse deadline from content (format: YYYY-MM-DD HH:mm:ss)
+      const deadlineDate = new Date('2026-02-19T23:59:59+09:00'); // KST
+      const isKoCountdown = line.content.includes('마감');
+      return (
+        <motion.div
+          className={`${baseClass} text-[#d8d8d8] flex items-start gap-2`}
+          {...lineAnimation}
+        >
+          <span className="text-[#888]">⏰</span>
+          <span>
+            <span className="text-[#888]">{isKoCountdown ? '지원 마감까지: ' : 'Time left: '}</span>
+            <CountdownTimer targetDate={deadlineDate} isKo={isKoCountdown} />
+          </span>
         </motion.div>
       );
     default:
@@ -1650,7 +1787,35 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
       });
       lines.push(
         { type: "blank", content: "" },
-        { type: "header", content: isKo ? "2-1. 누가 지원해야 할까요?" : "2-1. WHO SHOULD APPLY?", bullet: true },
+        // 2-1. 가치의 재편 섹션 (먼저)
+        { type: "header", content: isKo ? "2-1. 가치의 재편" : "2-1. THE SHIFT IN VALUE", bullet: true },
+        { type: "blank", content: "" },
+        { type: "output", content: isKo
+          ? "코드와 단순 유틸리티 서비스의 가치가 빠르게 낮아지고 있습니다. 이제 누구나 몇 시간 안에 'A를 B로 변환하는' 서비스를 만들 수 있게 되었습니다."
+          : "The value of code and simple utility services is declining rapidly. Anyone can now build 'convert A to B' services in just hours.", bullet: true },
+        { type: "blank", content: "" },
+        { type: "info", content: isKo
+          ? "반면, 극적으로 중요해지는 것들이 있습니다:"
+          : "Meanwhile, some things are becoming dramatically important:", bullet: true },
+        { type: "list-item", content: isKo
+          ? "복제 불가능한 커뮤니티와 IP — 기술은 복제되지만 문화는 복제되지 않는다"
+          : "Irreplaceable community and IP — tech can be forked, culture cannot", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "글로벌 비즈니스 네트워크 — 핵심 파트너를 설득하고, 유통 채널을 확보하는 능력"
+          : "Global business network — ability to persuade partners, secure distribution", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "브랜드와 신뢰 — 제품은 복제할 수 있지만 신뢰는 복제할 수 없다"
+          : "Brand and trust — products can be copied, but trust cannot", bulletColor: "green" },
+        { type: "blank", content: "" },
+        { type: "success", content: isKo
+          ? "앞으로는 코드를 짜는 능력보다 사람을 움직이는 능력이 더 중요해질 것 같습니다."
+          : "We believe the ability to move people will become more important than writing code.", bullet: true },
+        { type: "blank", content: "" },
+        { type: "dim", content: "─".repeat(50) },
+        { type: "blank", content: "" },
+
+        // 2-2. 누가 지원해야 할까요?
+        { type: "header", content: isKo ? "2-2. 누가 지원해야 할까요?" : "2-2. WHO SHOULD APPLY?", bullet: true },
         { type: "blank", content: "" },
         { type: "output", content: isKo
           ? "바이브 코딩 시대, 창업자의 역할이 달라지고 있다고 느낍니다. '작가'에서 '편집장' 혹은 '영화감독'에 가까워지고 있습니다."
@@ -1693,8 +1858,8 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "dim", content: "─".repeat(50) },
         { type: "blank", content: "" },
 
-        // Evaluation Criteria
-        { type: "header", content: isKo ? "2-2. 평가 기준" : "2-2. EVALUATION CRITERIA", bullet: true },
+        // 2-3. 평가 기준
+        { type: "header", content: isKo ? "2-3. 평가 기준" : "2-3. EVALUATION CRITERIA", bullet: true },
         { type: "blank", content: "" },
         { type: "output", content: isKo
           ? "기존 투자 심사 방식과 조금 다른 관점으로 팀을 보려고 합니다. 완성된 사업 계획서나 시장 분석도 의미가 있지만, 지금 이 순간 어떻게 움직이고 있는지에 더 관심이 갑니다."
@@ -1728,32 +1893,6 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "success", content: isKo
           ? "\"지금, 이미 움직이고 있는가?\""
           : "\"Are they already moving, right now?\"" },
-        { type: "blank", content: "" },
-        { type: "dim", content: "─".repeat(50) },
-        { type: "blank", content: "" },
-        // 가치의 재편 섹션
-        { type: "header", content: isKo ? "2-3. 가치의 재편" : "2-3. THE SHIFT IN VALUE", bullet: true },
-        { type: "blank", content: "" },
-        { type: "output", content: isKo
-          ? "코드와 단순 유틸리티 서비스의 가치가 빠르게 낮아지고 있습니다. 이제 누구나 몇 시간 안에 'A를 B로 변환하는' 서비스를 만들 수 있게 되었습니다."
-          : "The value of code and simple utility services is declining rapidly. Anyone can now build 'convert A to B' services in just hours.", bullet: true },
-        { type: "blank", content: "" },
-        { type: "info", content: isKo
-          ? "반면, 극적으로 중요해지는 것들이 있습니다:"
-          : "Meanwhile, some things are becoming dramatically important:", bullet: true },
-        { type: "list-item", content: isKo
-          ? "복제 불가능한 커뮤니티와 IP — 기술은 복제되지만 문화는 복제되지 않는다"
-          : "Irreplaceable community and IP — tech can be forked, culture cannot", bulletColor: "green" },
-        { type: "list-item", content: isKo
-          ? "글로벌 비즈니스 네트워크 — 핵심 파트너를 설득하고, 유통 채널을 확보하는 능력"
-          : "Global business network — ability to persuade partners, secure distribution", bulletColor: "green" },
-        { type: "list-item", content: isKo
-          ? "브랜드와 신뢰 — 제품은 복제할 수 있지만 신뢰는 복제할 수 없다"
-          : "Brand and trust — products can be copied, but trust cannot", bulletColor: "green" },
-        { type: "blank", content: "" },
-        { type: "success", content: isKo
-          ? "앞으로는 코드를 짜는 능력보다 사람을 움직이는 능력이 더 중요해질 것 같습니다."
-          : "We believe the ability to move people will become more important than writing code.", bullet: true },
         { type: "blank", content: "" },
         { type: "blink", content: isKo ? "Enter를 눌러 계속하세요..." : "Press Enter to continue..." },
         { type: "blank", content: "" },
@@ -1896,18 +2035,18 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         // 우리가 제공하지 않는 것
         { type: "header", content: isKo ? "우리가 제공하지 않는 것" : "WHAT WE DON'T OFFER", bullet: true },
         { type: "blank", content: "" },
-        { type: "dim", content: isKo
-          ? "✗ 정해진 커리큘럼이나 강의"
-          : "✗ Fixed curriculum or lectures" },
-        { type: "dim", content: isKo
-          ? "✗ 주간 보고서나 진행상황 발표 의무"
-          : "✗ Mandatory weekly reports or progress presentations" },
-        { type: "dim", content: isKo
-          ? "✗ \"피봇하세요\" 같은 간섭"
-          : "✗ Interference like \"you should pivot\"" },
-        { type: "dim", content: isKo
-          ? "✗ 엑셀러레이터식 획일적 조건"
-          : "✗ Cookie-cutter accelerator terms" },
+        { type: "list-item", content: isKo
+          ? "정해진 커리큘럼이나 강의"
+          : "Fixed curriculum or lectures", bulletChar: "✗" },
+        { type: "list-item", content: isKo
+          ? "주간 보고서나 진행상황 발표 의무"
+          : "Mandatory weekly reports or progress presentations", bulletChar: "✗" },
+        { type: "list-item", content: isKo
+          ? "\"피봇하세요\" 같은 간섭"
+          : "Interference like \"you should pivot\"", bulletChar: "✗" },
+        { type: "list-item", content: isKo
+          ? "엑셀러레이터식 획일적 조건"
+          : "Cookie-cutter accelerator terms", bulletChar: "✗" },
         { type: "blank", content: "" },
 
         // 우리가 제공하는 것
@@ -1931,8 +2070,8 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
 
         // 마무리 비전
         { type: "output", content: isKo
-          ? "\"지금 만들고 있는 것이, 8주 후에는 세상에 없던 제품이 됩니다.\""
-          : "\"What you're building now will become a product the world has never seen in 8 weeks.\"", bullet: true },
+          ? "\"8주 후, 첫 수십억원 상당의 ARR의 확신을 갖고 졸업할 수 있도록 함께 최선을 다합시다.\""
+          : "\"Let's do our best together so you graduate in 8 weeks with confidence in your first multi-billion KRW ARR.\"", bullet: true },
         { type: "blank", content: "" },
         { type: "blink", content: isKo ? "Enter를 눌러 계속하세요..." : "Press Enter to continue..." },
         { type: "blank", content: "" },
@@ -2182,8 +2321,8 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
           ? "시작할 때 ARR $0이어도 좋습니다."
           : "Starting with $0 ARR is fine.", bullet: true },
         { type: "output", content: isKo
-          ? "8주 후 $0이 아니면 됩니다."
-          : "Just don't end with $0." },
+          ? "8주 후, 수십억 이상의 ARR과 함께 졸업하는 것이 목표입니다."
+          : "The goal is to graduate with tens of millions in ARR after 8 weeks." },
         { type: "blank", content: "" },
         { type: "blink", content: isKo ? "Enter를 눌러 계속하세요..." : "Press Enter to continue..." },
         { type: "blank", content: "" },
@@ -2207,11 +2346,14 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "output", content: isKo
           ? "Hashed는 2017년 설립 이후, 기술 변화의 가장 앞선 지점에서 팀을 발굴해온 투자사입니다. Web3, AI, 컨텐츠 등 새로운 패러다임이 형성되는 초기 시점에 팀을 만나고, 함께 성장해왔습니다."
           : "Since 2017, Hashed has discovered teams at the forefront of technology shifts. At the early stages of new paradigms like Web3, AI, and content, we've met teams and grown together.", bullet: true },
+        { type: "list-item", content: isKo
+          ? "서울을 시작으로 샌프란시스코, 싱가포르, 방콕, 뱅갈루루, 아부다비에 오피스를 두고 있으며, 각 지역의 네트워크를 활용해 포트폴리오 팀들의 글로벌 진출과 Go-to-Market을 지원합니다."
+          : "With offices in Seoul, San Francisco, Singapore, Bangkok, Bengaluru, and Abu Dhabi, we leverage our regional networks to help portfolio teams with global expansion and Go-to-Market strategies.", bulletColor: "cyan" },
         { type: "blank", content: "" },
         // Hashed Labs 2019 트랙레코드
         { type: "output", content: isKo
-          ? "2019년 초, 블록체인 게임 섹터를 대상으로 'Hashed Labs'라는 3개월간의 초기투자 및 지원 프로그램을 운영했습니다. 당시 5개 팀 중 2개가 유니콘이 되었습니다:"
-          : "In early 2019, we ran 'Hashed Labs'—a 3-month early-stage investment program focused on blockchain gaming. 2 out of 5 teams became unicorns:", bullet: true },
+          ? "Hashed는 2019년 초, 곧 블록체인 게임 섹터가 부상할 것이라는 논지를 기반으로 'Hashed Labs'라는 3개월간의 극초기투자 및 지원 프로그램을 운영했습니다. 당시 5개 팀 중 2개가 유니콘이 되었습니다:"
+          : "In early 2019, based on the thesis that blockchain gaming would soon rise, Hashed ran 'Hashed Labs'—a 3-month pre-seed investment program. 2 out of 5 teams became unicorns:", bullet: true },
         { type: "info", content: isKo
           ? "  · Sky Mavis (베트남) — Axie Infinity"
           : "  · Sky Mavis (Vietnam) — Axie Infinity" },
@@ -2234,13 +2376,9 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "link", content: "   → [Hashed Labs] Is NFT the Future of Blockchain Game? — Panel Discussion",
           href: "https://www.youtube.com/watch?v=baCCOkq5ISo" },
         { type: "blank", content: "" },
-        { type: "list-item", content: isKo
-          ? "서울을 시작으로 샌프란시스코, 싱가포르, 방콕, 뱅갈루루, 아부다비에 오피스를 두고 있으며, 각 지역의 네트워크를 활용해 포트폴리오 팀들의 글로벌 진출과 Go-to-Market을 지원합니다."
-          : "With offices in Seoul, San Francisco, Singapore, Bangkok, Bengaluru, and Abu Dhabi, we leverage our regional networks to help portfolio teams with global expansion and Go-to-Market strategies.", bulletColor: "cyan" },
-        { type: "blank", content: "" },
         { type: "info", content: isKo
-          ? "Vibe Labs는 그동안 축적해온 '초기 신호를 읽는 경험'을 정리한 프로그램입니다. 말로 설득하기 전에 이미 움직이고 있는 팀을 찾고, 함께 빌딩하며 성장을 지원하고 싶습니다."
-          : "Vibe Labs is a program that organizes our experience of reading early signals. Finding teams already moving before they persuade with words, and supporting their growth by building together.", bullet: true },
+          ? "Hashed Vibe Labs는 지난 극초기투자 프로그램의 성공과 운영 경험을 바탕으로, 바이브 코딩 창업자의 시대를 맞이하여 런칭하는 프로그램입니다."
+          : "Hashed Vibe Labs is a program launched to embrace the era of vibe coding founders, building on the success and operational experience of our previous pre-seed investment program.", bullet: true },
         { type: "blank", content: "" },
         { type: "dim", content: "─".repeat(50) },
         { type: "blank", content: "" },
@@ -2283,13 +2421,26 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
           ? "직접 빌딩해봐야 빌더를 더 잘 이해할 수 있다고 믿습니다. 창업자가 'AI로 이틀 만에 MVP를 만들었는데 스케일링에서 막혔어요'라고 말할 때, 같은 경험을 해본 사람과 그렇지 않은 사람의 대화는 질적으로 다릅니다."
           : "We believe you understand builders better when you build yourself. When a founder says 'I made an MVP in 2 days with AI but hit a wall scaling,' the conversation is qualitatively different with someone who's been there.", bullet: true },
         { type: "blank", content: "" },
-        { type: "success", content: isKo ? "대표의 직접 바이브 코딩 사례:" : "CEO's Direct Vibe Coding Examples:", bullet: true },
+        { type: "success", content: isKo ? "김서준(Simon Kim) 대표의 바이브 코딩 사례:" : "CEO Simon Kim's Vibe Coding Examples:", bullet: true },
         { type: "list-item", content: isKo
-          ? "ETHval — 8개 밸류에이션 모델 적용 대시보드를 4시간 만에 프로토타입 완성"
-          : "ETHval — Dashboard with 8 valuation models prototyped in 4 hours", bulletColor: "yellow" },
+          ? "ETHval — 이더리움의 적정가치를 12개 밸류에이션 모델을 통해 추정하는 대시보드, Kaito Yap에서 글로벌 1위 달성"
+          : "ETHval — Dashboard estimating Ethereum's fair value through 12 valuation models, ranked #1 globally on Kaito Yap", bulletColor: "yellow" },
+        { type: "link", content: "   → [ETHval] Ethereum Valuation Dashboard ↗",
+          href: "https://ethval.com" },
+        { type: "link", content: isKo
+          ? "   → [Medium] ETHval 프로젝트 1주차 소회 — 이더리움의 가치를 어떻게 평가할까? ↗"
+          : "   → [Medium] Reflections on Week One of the ETHval Project ↗",
+          href: isKo ? "https://medium.com/hashed-kr/ethval-3342605de841" : "https://medium.com/hashed-official/ereflections-on-week-one-of-the-ethval-project-how-to-assess-the-fair-value-of-ethereum-f9700e1c8d6f" },
         { type: "list-item", content: isKo
           ? "Only In Abu Dhabi — 아부다비 출장 비행 중 제작, 실제 비즈니스 협업으로 연결"
           : "Only In Abu Dhabi — Built during flight, led to actual business partnerships", bulletColor: "yellow" },
+        { type: "link", content: "   → [Only In Abu Dhabi] Abu Dhabi Experience Platform ↗",
+          href: "https://onlyinabu.com" },
+        { type: "list-item", content: isKo
+          ? "Hashed Vibe Labs — Hashed Vibe Labs 웹사이트도 바이브 코딩으로 직접 개발"
+          : "Hashed Vibe Labs — Website also built with vibe coding", bulletColor: "yellow" },
+        { type: "link", content: "   → [Hashed Vibe Labs] Official Website ↗",
+          href: "https://vibelabs.hashed.com" },
         { type: "blank", content: "" },
         { type: "dim", content: "─".repeat(50) },
         { type: "blank", content: "" },
@@ -2298,13 +2449,13 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "header", content: isKo ? "5-4. Hashed 포트폴리오 분포" : "5-4. HASHED PORTFOLIO DISTRIBUTION", bullet: true },
         { type: "blank", content: "" },
         { type: "dim", content: isKo
-          ? "전 세계 블록체인 프로젝트에 적극적으로 투자하고 있으며, 북미와 아시아에 집중하면서도 지리적 다양성을 유지하고 있습니다."
-          : "Actively investing in blockchain projects worldwide, focusing on North America and Asia while maintaining geographic diversity.", bullet: true },
+          ? "전 세계 혁신 스타트업에 투자하고 있으며, 북미와 아시아에 집중하면서도 지리적 다양성을 유지하고 있습니다."
+          : "Investing in innovative startups worldwide, focusing on North America and Asia while maintaining geographic diversity.", bullet: true },
         { type: "blank", content: "" },
-        { type: "output", content: isKo ? "북미     ~70팀" : "North America   ~70 teams" },
-        { type: "output", content: isKo ? "아시아   150+팀" : "Asia            150+ teams" },
-        { type: "output", content: isKo ? "유럽     10+팀" : "Europe          10+ teams" },
-        { type: "output", content: isKo ? "기타     6팀" : "Others          6 teams" },
+        // Portfolio Distribution Stats
+        { type: "output", content: isKo ? "   ╔══════════════════════════════════════════════════════════════════════╗" : "   ╔══════════════════════════════════════════════════════════════════════╗" },
+        { type: "output", content: isKo ? "   ║  ● 아시아 150+팀    ● 북미 ~70팀    ● 유럽 10+팀    ● 기타 6팀      ║" : "   ║  ● Asia 150+    ● N.America ~70    ● Europe 10+    ● Others 6        ║" },
+        { type: "output", content: isKo ? "   ╚══════════════════════════════════════════════════════════════════════╝" : "   ╚══════════════════════════════════════════════════════════════════════╝" },
         { type: "blank", content: "" },
         { type: "dim", content: "─".repeat(50) },
         { type: "blank", content: "" },
@@ -2329,8 +2480,8 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
         { type: "success", content: isKo ? "2) 글로벌 네트워크" : "2) Global Network", bullet: true },
         { type: "list-item", content: isKo
-          ? "아시아, 중동, 미국을 잇는 투자자·창업자 네트워크"
-          : "Investor and founder network connecting Asia, Middle East, and US", bulletColor: "blue" },
+          ? "한국, 일본, 동남아, 미국, 중동을 잇는 투자자·창업자 네트워크"
+          : "Investor and founder network connecting Korea, Japan, Southeast Asia, US, and Middle East", bulletColor: "blue" },
         { type: "list-item", content: isKo
           ? "해시드 벤처펀드의 50여개 LP 전원이 전략적 투자자(연기금/공제회 없음)로 구성, 국내외 대기업 및 금융기관들과 직접적 협력 네트워크 구축"
           : "All 50+ LPs are strategic investors (no pension funds), with direct partnership networks to major corporations and financial institutions globally", bulletColor: "blue" },
@@ -2454,6 +2605,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "error", content: isKo
           ? "⚠ 지원 마감: 2026년 2월 19일 (목) 23:59:59 KST"
           : "⚠ Deadline: Feb 19, 2026 (Thu) 23:59:59 KST", bullet: true },
+        { type: "countdown", content: isKo ? "마감" : "deadline" },
         { type: "blank", content: "" },
         { type: "dim", content: "─".repeat(50) },
         { type: "blank", content: "" },

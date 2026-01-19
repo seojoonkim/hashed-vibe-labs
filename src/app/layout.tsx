@@ -29,12 +29,21 @@ export const metadata: Metadata = {
     type: "website",
     locale: "ko_KR",
     siteName: "Hashed Vibe Labs",
+    images: [
+      {
+        url: "/og-image.png?v=2",
+        width: 1200,
+        height: 630,
+        alt: "Hashed Vibe Labs",
+      },
+    ],
   },
   metadataBase: new URL("https://hashed-vibe-labs.vercel.app"),
   twitter: {
     card: "summary_large_image",
     title: "Hashed Vibe Labs",
     description: "8-week builder program for AI-native founders in Seoul",
+    images: ["/og-image.png?v=2"],
   },
 };
 

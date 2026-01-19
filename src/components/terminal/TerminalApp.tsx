@@ -77,6 +77,7 @@ interface TerminalLine {
   isTyping?: boolean; // For typing cursor effect
   bulletColor?: BulletColor; // For colored bullets in list items
   bullet?: boolean; // Explicitly show bullet (for paragraph starts)
+  bulletChar?: string; // Custom bullet character (e.g., "✗", "✓")
 }
 
 // Menu commands

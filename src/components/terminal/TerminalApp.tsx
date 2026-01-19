@@ -597,11 +597,11 @@ export default function TerminalApp() {
     : "Closed";
 
   return (
-    <div className={`min-h-[100dvh] h-[100dvh] bg-[#0d0d0d] text-[#d8d8d8] font-mono flex flex-col overflow-hidden ${isMobile ? 'p-1 pb-[env(safe-area-inset-bottom)]' : 'p-2'} ${isMobile ? 'text-sm' : 'text-sm'}`}>
+    <div className={`min-h-[100dvh] h-[100dvh] bg-[#0d0d0d] text-[#d8d8d8] font-mono flex flex-col overflow-hidden ${isMobile ? 'pb-[env(safe-area-inset-bottom)]' : 'p-2'} text-sm`}>
       {/* Terminal window with border */}
-      <div className="flex-1 flex flex-col overflow-hidden overflow-x-hidden bg-[#1a1a1a] border border-[#333] rounded-lg">
+      <div className={`flex-1 flex flex-col overflow-hidden overflow-x-hidden bg-[#1a1a1a] ${isMobile ? '' : 'border border-[#333] rounded-lg'}`}>
       {/* Terminal Header - Fixed */}
-      <div className="flex-shrink-0 bg-[#252525] border-b border-[#333] rounded-t-lg">
+      <div className={`flex-shrink-0 bg-[#252525] border-b border-[#333] ${isMobile ? '' : 'rounded-t-lg'}`}>
         <div className={`${isMobile ? 'px-4' : 'max-w-[900px] mx-auto w-full px-6'} py-2 flex items-center justify-between`}>
           <div className="flex items-center gap-3">
             {/* Traffic lights */}

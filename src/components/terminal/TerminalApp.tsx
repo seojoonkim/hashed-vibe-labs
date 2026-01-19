@@ -230,6 +230,7 @@ export default function TerminalApp() {
   const lineIdRef = useRef(0);
   const heroAnimatedRef = useRef(false);
   const isTypingRef = useRef(false); // Ref for immediate typing state check
+  const abortRef = useRef(false); // Ref for aborting current output
   const countdown = useCountdown();
 
   const isKo = language === "ko";
@@ -253,6 +254,13 @@ export default function TerminalApp() {
     isTypingRef.current = true;
     setIsTyping(true);
     for (let i = 0; i < newLines.length; i++) {
+      // Check if aborted - just stop, don't reset abortRef (let caller handle it)
+      if (abortRef.current) {
+        isTypingRef.current = false;
+        setIsTyping(false);
+        return;
+      }
+
       const line = newLines[i];
       const lineId = generateId();
 
@@ -261,6 +269,15 @@ export default function TerminalApp() {
       scrollToBottom();
 
       await new Promise(resolve => setTimeout(resolve, delay));
+
+      // Check abort again after delay
+      if (abortRef.current) {
+        // Remove typing cursor before exiting
+        setLines(prev => prev.map(l => l.id === lineId ? { ...l, isTyping: false } : l));
+        isTypingRef.current = false;
+        setIsTyping(false);
+        return;
+      }
 
       // Remove typing cursor after delay
       setLines(prev => prev.map(l => l.id === lineId ? { ...l, isTyping: false } : l));
@@ -383,9 +400,9 @@ export default function TerminalApp() {
   }, [asciiLineIndex, taglineIndex, totalAsciiLines]);
 
   // Show loading animation
-  const showLoading = useCallback(async (sectionId: string): Promise<void> => {
+  const showLoading = useCallback(async (sectionId: string): Promise<boolean> => {
     const messages = LOADING_MESSAGES[sectionId];
-    if (!messages) return;
+    if (!messages) return true;
 
     const langMessages = language === "ko" ? messages.ko : messages.en;
 
@@ -393,10 +410,20 @@ export default function TerminalApp() {
     setIsThinking(true);
     scrollToBottom();
     await new Promise(resolve => setTimeout(resolve, ANIMATION_SPEED * 3));
+
+    if (abortRef.current) {
+      setIsThinking(false);
+      setLoadingState(null);
+      return false;
+    }
     setIsThinking(false);
 
     // Show each loading message with animation
     for (let i = 0; i < langMessages.length; i++) {
+      if (abortRef.current) {
+        setLoadingState(null);
+        return false;
+      }
       setLoadingState({ isLoading: true, sectionId, messageIndex: i });
       scrollToBottom();
       // Last message (Done!) shows briefly, others show longer
@@ -405,17 +432,45 @@ export default function TerminalApp() {
     }
 
     setLoadingState(null);
+    return true;
   }, [language, scrollToBottom]);
 
   // Handle command selection
   const handleCommand = async (commandId: string) => {
-    // Prevent duplicate execution while already typing (use ref for immediate check)
-    if (isTypingRef.current || isTyping || loadingState?.isLoading) return;
+    const command = MENU_COMMANDS.find(c => c.id === commandId);
+    if (!command) return;
 
     closeMenu();
 
-    const command = MENU_COMMANDS.find(c => c.id === commandId);
-    if (!command) return;
+    // If currently outputting, abort and show interrupt message
+    const wasOutputting = isTypingRef.current || isTyping || loadingState?.isLoading || isThinking;
+    if (wasOutputting) {
+      // Signal abort
+      abortRef.current = true;
+
+      // Immediately stop all states
+      isTypingRef.current = false;
+      setIsTyping(false);
+      setIsThinking(false);
+      setLoadingState(null);
+
+      // Wait for any pending async operations to see abort flag
+      await new Promise(resolve => setTimeout(resolve, 150));
+
+      // Reset abort flag
+      abortRef.current = false;
+
+      // Clear all typing cursors and add interrupt message with clear separation
+      setLines(prev => [
+        ...prev.map(l => ({ ...l, isTyping: false })),
+        { id: generateId(), type: "blank" as const, content: "" },
+        { id: generateId(), type: "system" as const, content: language === "ko" ? "^C 중단됨" : "^C Interrupted" },
+        { id: generateId(), type: "blank" as const, content: "" },
+      ]);
+
+      // Wait for React to process state update
+      await new Promise(resolve => setTimeout(resolve, 100));
+    }
 
     // Handle clear command - reset to hero
     if (commandId === "clear") {
@@ -440,20 +495,26 @@ export default function TerminalApp() {
     // Remove previous "blink" lines (Press Enter to continue...)
     setLines(prev => prev.filter(line => line.type !== "blink"));
 
-    // Add command line
-    await addLines([
-      { type: "blank", content: "" },
-      { type: "command", content: `> ${command.command}` },
-    ], ANIMATION_SPEED);
+    // Add command line (skip extra blank if we just added interrupt message)
+    const commandLines: Omit<TerminalLine, "id">[] = wasOutputting
+      ? [{ type: "command", content: `> ${command.command}` }]
+      : [{ type: "blank", content: "" }, { type: "command", content: `> ${command.command}` }];
+
+    await addLines(commandLines, ANIMATION_SPEED);
+
+    // Check if aborted during command line addition
+    if (abortRef.current) return;
 
     // Scroll to bottom before loading animation
     scrollToBottom();
 
     // Show loading animation
-    await showLoading(commandId);
+    const loadingCompleted = await showLoading(commandId);
+    if (!loadingCompleted) return;
 
     // Add blank line after loading
     await addLines([{ type: "blank", content: "" }], ANIMATION_SPEED);
+    if (abortRef.current) return;
 
     // Get section content
     const sectionLines = getSectionContent(commandId, language);

@@ -6,9 +6,9 @@ import { useI18n } from "@/lib/i18n";
 import { PROGRAM_DATA } from "@/lib/constants";
 
 // Animation timing constants (all in ms)
-const ANIMATION_SPEED = 122; // Base speed for text lines (35% slower)
-const HERO_STEP_DELAY = 675; // Delay between hero animation steps (35% slower)
-const ASCII_LINE_DELAY = 95; // Delay per ASCII art line (35% slower)
+const ANIMATION_SPEED = 98; // Base speed for text lines (20% faster)
+const HERO_STEP_DELAY = 540; // Delay between hero animation steps (20% faster)
+const ASCII_LINE_DELAY = 76; // Delay per ASCII art line (20% faster)
 
 // Application deadline: February 19, 2026, 23:59:59 KST
 const DEADLINE = new Date("2026-02-19T23:59:59+09:00").getTime();
@@ -262,13 +262,15 @@ export default function TerminalApp() {
     // Use requestAnimationFrame to ensure DOM has updated before scrolling
     requestAnimationFrame(() => {
       if (terminalBodyRef.current) {
+        // On mobile, scroll to a position slightly above the bottom so loading appears higher
+        const offset = isMobile ? 80 : 0;
         terminalBodyRef.current.scrollTo({
-          top: terminalBodyRef.current.scrollHeight,
+          top: terminalBodyRef.current.scrollHeight - offset,
           behavior: "smooth"
         });
       }
     });
-  }, []);
+  }, [isMobile]);
 
   // Add lines with typing effect
   const addLines = useCallback(async (newLines: Omit<TerminalLine, "id">[], delay = ANIMATION_SPEED) => {

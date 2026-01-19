@@ -887,8 +887,8 @@ export default function TerminalApp() {
                       >
                         <span className="mr-2 flex-shrink-0 text-[#555]" style={{ fontSize: '0.45em', position: 'relative', top: '0.15em' }}>●</span>
                         <span>{isKo
-                          ? "Claude 개발사 Anthropic 본사의 지원을 포함, 국내외 최고 수준의 바이브 코딩 개발자들이 멘토로 참여"
-                          : "Mentored by world-class vibe coders, with support from Anthropic (creators of Claude)"}</span>
+                          ? "국내외 최고 수준의 바이브 코딩 개발자들이 멘토로 참여"
+                          : "Mentored by world-class vibe coders"}</span>
                       </motion.div>
                     )}
                   </div>
@@ -2021,8 +2021,8 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
         { type: "success", content: isKo ? "4) 바이브 코딩 멘토링" : "4) Vibe Coding Mentorship", bullet: true },
         { type: "list-item", content: isKo
-          ? "Anthropic 본사의 지원을 포함, 국내외 최고 수준의 바이브 코딩 개발자들이 멘토로 참여"
-          : "World-class vibe coders as mentors, with support from Anthropic HQ", bulletColor: "yellow" },
+          ? "국내외 최고 수준의 바이브 코딩 개발자들이 멘토로 참여"
+          : "World-class vibe coders as mentors", bulletColor: "yellow" },
         { type: "list-item", content: isKo
           ? "배치에 선발된 창업자들과의 학습 및 교류 세션"
           : "Learning and networking sessions with selected batch founders", bulletColor: "yellow" },

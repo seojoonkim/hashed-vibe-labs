@@ -2039,9 +2039,9 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "link", content: "   → [Hashed Labs] Is NFT the Future of Blockchain Game? — Panel Discussion",
           href: "https://www.youtube.com/watch?v=baCCOkq5ISo" },
         { type: "blank", content: "" },
-        { type: "dim", content: isKo
+        { type: "list-item", content: isKo
           ? "서울을 시작으로 샌프란시스코, 싱가포르, 방콕, 뱅갈루루, 아부다비에 오피스를 두고 있으며, 각 지역의 네트워크를 활용해 포트폴리오 팀들의 글로벌 진출과 Go-to-Market을 지원합니다."
-          : "With offices in Seoul, San Francisco, Singapore, Bangkok, Bengaluru, and Abu Dhabi, we leverage our regional networks to help portfolio teams with global expansion and Go-to-Market strategies.", bullet: true },
+          : "With offices in Seoul, San Francisco, Singapore, Bangkok, Bengaluru, and Abu Dhabi, we leverage our regional networks to help portfolio teams with global expansion and Go-to-Market strategies.", bulletColor: "cyan" },
         { type: "blank", content: "" },
         { type: "info", content: isKo
           ? "Vibe Labs는 그동안 축적해온 '초기 신호를 읽는 경험'을 정리한 프로그램입니다. 말로 설득하기 전에 이미 움직이고 있는 팀을 찾고, 함께 빌딩하며 성장을 지원하고 싶습니다."

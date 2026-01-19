@@ -55,7 +55,7 @@ function useCountdown() {
 }
 
 // Bullet color types for list items
-type BulletColor = "green" | "blue" | "yellow" | "orange" | "gray";
+type BulletColor = "green" | "blue" | "yellow" | "orange" | "gray" | "cyan";
 
 // Bullet color map
 const BULLET_COLORS: Record<BulletColor, string> = {
@@ -64,6 +64,7 @@ const BULLET_COLORS: Record<BulletColor, string> = {
   yellow: "#fbbf24",  // 강조/중요
   orange: "#e07a5f",  // 액션/행동
   gray: "#777",       // 기본
+  cyan: "#22d3ee",    // 하이라이트/특별
 };
 
 // Terminal line types
@@ -1911,84 +1912,239 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
       lines.push(
         { type: "blank", content: "" },
         { type: "header", content: isKo ? "4-1. 프로그램 일정" : "4-1. PROGRAM TIMELINE", bullet: true },
-        { type: "dim", content: isKo ? "첫 번째 기수 Seoul Edition #1" : "First Cohort: Seoul Edition #1" },
-        { type: "blank", content: "" },
-        { type: "output", content: isKo ? "2026.01.30 (목)" : "Jan 30, 2026 (Thu)", bullet: true },
-        { type: "info", content: "Offline Entry Session" },
-        { type: "dim", content: isKo ? "잠재 지원자 대상 밋업" : "Meetup for potential applicants" },
-        { type: "blank", content: "" },
-        { type: "output", content: isKo ? "2026.02.01 – 02.19" : "Feb 1 – 19, 2026", bullet: true },
-        { type: "info", content: "Application" },
-        { type: "dim", content: isKo ? "공식 지원 접수" : "Official application period" },
-        { type: "blank", content: "" },
-        { type: "output", content: isKo ? "2026.02.27 (목)" : "Feb 27, 2026 (Thu)", bullet: true },
-        { type: "info", content: "Finalist Announcement" },
-        { type: "dim", content: isKo ? "본 프로그램 참여 팀 발표" : "Team selection announcement" },
-        { type: "blank", content: "" },
-        { type: "output", content: isKo ? "2026.03 – 04 (약 8주)" : "Mar – Apr 2026 (~8 weeks)", bullet: true },
-        { type: "info", content: "Vibe Labs Seoul" },
-        { type: "dim", content: isKo ? "투자 기반 프로그램" : "Investment-based program" },
-        { type: "blank", content: "" },
-        { type: "dim", content: "─".repeat(50) },
+        { type: "dim", content: isKo ? "Seoul Edition #1" : "Seoul Edition #1" },
         { type: "blank", content: "" },
 
-        // Detailed Timeline
-        { type: "header", content: isKo ? "4-2. 세부 일정" : "4-2. DETAILED SCHEDULE", bullet: true },
-        { type: "blank", content: "" },
-        { type: "success", content: "1. Offline Entry Session (Seoul)", bullet: true },
+        // 1. Offline Entry Session
+        { type: "success", content: "1. Offline Entry Session", bullet: true },
         { type: "output", content: isKo ? "2026.01.30 (목)" : "Jan 30, 2026 (Thu)" },
         { type: "list-item", content: isKo
-          ? "일부 잠재 지원자들이 참여하는 오프라인 밋업"
-          : "An offline meetup for some potential applicants", bulletColor: "blue" },
+          ? "잠재 지원자들이 참여하는 오프라인 밋업"
+          : "Offline meetup for potential applicants", bulletColor: "blue" },
         { type: "list-item", content: isKo
-          ? "Vibe Labs Seoul 본 프로그램과는 별도"
-          : "Separate from Vibe Labs Seoul main program", bulletColor: "blue" },
-        { type: "list-item", content: isKo
-          ? "참여는 선발이나 투자와 직결되지 않음"
-          : "Participation does not directly lead to selection or investment", bulletColor: "blue" },
-        { type: "list-item", content: isKo
-          ? "상호 교류 및 현장 관찰 중심"
-          : "Focus on networking and on-site observation", bulletColor: "blue" },
+          ? "Hashed 팀과 직접 만나고, 다른 빌더들과 교류"
+          : "Meet Hashed team and network with other builders", bulletColor: "blue" },
+        { type: "dim", content: isKo
+          ? "※ 밋업 참여가 선발에 직접적인 영향을 주지는 않습니다."
+          : "※ Meetup participation does not directly affect selection." },
         { type: "blank", content: "" },
 
+        // 2. Application
         { type: "success", content: "2. Application", bullet: true },
-        { type: "output", content: isKo ? "2026.02.01 – 02.19 (목)" : "Feb 1 – 19, 2026 (Thu)" },
+        { type: "output", content: isKo ? "2026.02.01 – 02.19" : "Feb 1 – 19, 2026" },
         { type: "list-item", content: isKo
           ? "개인 또는 팀 단위 지원"
           : "Apply as individual or team", bulletColor: "blue" },
-        { type: "output", content: isKo ? "제출 내용:" : "Submit:" },
-        { type: "dim", content: isKo
-          ? "• 현재 만들고 있는 것 (URL, demo, repo 등)"
-          : "• What you're building (URL, demo, repo, etc.)" },
-        { type: "dim", content: isKo
-          ? "• 간단한 배경 설명"
-          : "• Brief background description" },
+        { type: "list-item", content: isKo
+          ? "현재 만들고 있는 것 (URL, demo, repo 등)"
+          : "What you're building (URL, demo, repo, etc.)", bulletColor: "blue" },
+        { type: "list-item", content: isKo
+          ? "간단한 배경 설명"
+          : "Brief background description", bulletColor: "blue" },
         { type: "info", content: isKo
           ? "✓ 장문의 서술형 질문 없음"
           : "✓ No long essay questions" },
         { type: "blank", content: "" },
 
+        // 3. Finalist Announcement
         { type: "success", content: "3. Finalist Announcement", bullet: true },
         { type: "output", content: isKo ? "2026.02.27 (목)" : "Feb 27, 2026 (Thu)" },
         { type: "list-item", content: isKo
-          ? "Vibe Labs Seoul 본 프로그램에 참여할 3–5팀 발표"
-          : "3-5 teams announced for Vibe Labs Seoul main program", bulletColor: "yellow" },
+          ? "본 프로그램에 참여할 3–5팀 발표"
+          : "3-5 teams announced for main program", bulletColor: "yellow" },
         { type: "list-item", content: isKo
-          ? "발표와 동시에 직접 투자 집행"
-          : "Direct investment executed upon announcement", bulletColor: "yellow" },
+          ? "발표와 동시에 투자 집행 (5% 지분에 1억원)"
+          : "Investment executed upon announcement (₩100M for 5%)", bulletColor: "yellow" },
         { type: "blank", content: "" },
 
-        { type: "success", content: "4. Vibe Labs Seoul — Core Program", bullet: true },
-        { type: "output", content: isKo ? "2026.03 – 04 (약 8주)" : "Mar – Apr 2026 (~8 weeks)" },
+        // 4. Vibe Labs Seoul
+        { type: "success", content: "4. Vibe Labs Seoul", bullet: true },
+        { type: "output", content: isKo ? "2026.03.02 – 04 (약 8주)" : "Mar 2 – Apr 2026 (~8 weeks)" },
         { type: "list-item", content: isKo
-          ? "선발된 팀만 참여"
-          : "Only selected teams participate", bulletColor: "green" },
+          ? "선발된 팀들과 함께하는 집중 빌딩 기간"
+          : "Intensive building period with selected teams", bulletColor: "green" },
         { type: "list-item", content: isKo
-          ? "Asynchronous 중심: 빌드 → 배포 → 반복"
-          : "Asynchronous focus: Build → Deploy → Iterate", bulletColor: "green" },
+          ? "주 1회 GTM 멘토링 + 바이브 코딩 코칭"
+          : "Weekly GTM mentoring + vibe coding coaching", bulletColor: "green" },
         { type: "list-item", content: isKo
-          ? "Hashed는 팀들의 속도, 변화, 제품 진화를 지속적으로 관찰"
-          : "Hashed continuously observes team speed, changes, and product evolution", bulletColor: "green" },
+          ? "온라인 상시 교류 + 상호 피드백 세션"
+          : "Constant online communication + peer feedback sessions", bulletColor: "green" },
+        { type: "blank", content: "" },
+
+        // 5. Demo Day
+        { type: "success", content: "5. Demo Day", bullet: true },
+        { type: "output", content: isKo ? "2026.04 말 (예정)" : "Late Apr 2026 (TBD)" },
+        { type: "list-item", content: isKo
+          ? "8주간의 결과물을 투자자와 빌더 커뮤니티에 공개"
+          : "Present results to investors and builder community", bulletColor: "cyan" },
+        { type: "list-item", content: isKo
+          ? "국내외 50+ VC 및 Hashed LP 네트워크에 소개"
+          : "Introduction to 50+ VCs and Hashed LP network", bulletColor: "cyan" },
+        { type: "blank", content: "" },
+        { type: "dim", content: "─".repeat(50) },
+        { type: "blank", content: "" },
+
+        // 4-2. 8주의 여정
+        { type: "header", content: isKo ? "4-2. 8주의 여정" : "4-2. THE 8-WEEK JOURNEY", bullet: true },
+        { type: "blank", content: "" },
+        { type: "output", content: isKo
+          ? "\"목표는 단 하나. 8주 안에 ARR을 만들거나, 수 배 이상 높이는 것.\""
+          : "\"One goal: Create ARR or multiply it several times in 8 weeks.\"", bullet: true },
+        { type: "blank", content: "" },
+
+        // ARR 설명
+        { type: "info", content: isKo ? "ARR이란?" : "What is ARR?", bullet: true },
+        { type: "blank", content: "" },
+        { type: "list-item", content: isKo
+          ? "Annual Recurring Revenue — 연간 반복 매출"
+          : "Annual Recurring Revenue — yearly recurring income", bulletColor: "cyan" },
+        { type: "list-item", content: isKo
+          ? "단순 매출이 아니라, '반복해서 들어오는 돈'"
+          : "Not just revenue, but 'money that keeps coming back'", bulletColor: "cyan" },
+        { type: "blank", content: "" },
+        { type: "dim", content: isKo ? "왜 중요한가?" : "Why does it matter?" },
+        { type: "list-item", content: isKo
+          ? "사용자가 돈을 낸다 = 진짜 문제를 풀고 있다는 증거"
+          : "Users pay = proof you're solving a real problem", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "반복해서 낸다 = 제품이 습관이 되었다는 증거"
+          : "They pay repeatedly = proof your product became a habit", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "ARR 성장 속도 = 투자자가 보는 가장 강력한 신호"
+          : "ARR growth rate = the strongest signal investors look for", bulletColor: "green" },
+        { type: "blank", content: "" },
+        { type: "dim", content: isKo ? "ARR이 없다면?" : "No ARR yet?" },
+        { type: "list-item", content: isKo
+          ? "2주 안에 첫 결제를 만드는 것이 절대 목표"
+          : "Absolute goal: get your first payment within 2 weeks", bulletColor: "yellow" },
+        { type: "list-item", content: isKo
+          ? "무료 사용자 1만 명보다 결제 사용자 100명이 더 강력한 신호"
+          : "100 paying users is a stronger signal than 10,000 free users", bulletColor: "yellow" },
+        { type: "blank", content: "" },
+        { type: "output", content: isKo
+          ? "모든 멘토링, 코칭, 네트워크 연결은 이 목표를 위해 존재합니다."
+          : "All mentoring, coaching, and network connections exist for this goal." },
+        { type: "blank", content: "" },
+        { type: "dim", content: "─".repeat(50) },
+        { type: "blank", content: "" },
+
+        // Week 1
+        { type: "success", content: isKo ? "Week 1: 현실 직시" : "Week 1: Face Reality", bullet: true },
+        { type: "blank", content: "" },
+        { type: "list-item", content: isKo
+          ? "투자금 납입 및 법인 셋업 지원"
+          : "Investment deposit and corporate setup support", bulletColor: "blue" },
+        { type: "list-item", content: isKo
+          ? "현재 상태 정밀 진단 — ARR, 사용자 수, 전환율, 이탈률"
+          : "Precise diagnosis — ARR, users, conversion rate, churn rate", bulletColor: "blue" },
+        { type: "list-item", content: isKo
+          ? "없으면 0부터 시작. 그것도 좋은 출발점"
+          : "Starting from 0 is fine. It's a good starting point", bulletColor: "blue" },
+        { type: "list-item", content: isKo
+          ? "8주 후 도달할 목표 수치 설정"
+          : "Set target numbers to reach in 8 weeks", bulletColor: "blue" },
+        { type: "list-item", content: isKo
+          ? "성장을 막는 가장 큰 병목 1가지 특정"
+          : "Identify the single biggest bottleneck blocking growth", bulletColor: "blue" },
+        { type: "blank", content: "" },
+        { type: "dim", content: isKo
+          ? "\"측정하지 않으면 개선할 수 없다.\""
+          : "\"You can't improve what you don't measure.\"" },
+        { type: "blank", content: "" },
+
+        // Week 2-3
+        { type: "success", content: isKo ? "Week 2-3: 첫 결제 (또는 10배 더)" : "Week 2-3: First Payment (or 10x More)", bullet: true },
+        { type: "blank", content: "" },
+        { type: "list-item", content: isKo
+          ? "ARR 0이라면 → 첫 결제가 일어나는 구조 설계"
+          : "If ARR is 0 → design a structure for first payment", bulletColor: "blue" },
+        { type: "list-item", content: isKo
+          ? "ARR 있다면 → 결제를 막는 friction 제거"
+          : "If ARR exists → remove friction blocking payments", bulletColor: "blue" },
+        { type: "list-item", content: isKo
+          ? "가격 실험, 플랜 구조 테스트"
+          : "Price experiments, plan structure tests", bulletColor: "blue" },
+        { type: "list-item", content: isKo
+          ? "\"무료로 써도 되는 이유\"를 없애기"
+          : "Eliminate \"reasons to stay free\"", bulletColor: "blue" },
+        { type: "blank", content: "" },
+        { type: "dim", content: isKo
+          ? "\"첫 1달러가 가장 어렵다. 그 다음 1,000달러는 더 쉽다.\""
+          : "\"The first dollar is the hardest. The next 1,000 is easier.\"" },
+        { type: "blank", content: "" },
+
+        // Week 4-5
+        { type: "success", content: isKo ? "Week 4-5: 작동하는 채널 찾기" : "Week 4-5: Find What Works", bullet: true },
+        { type: "blank", content: "" },
+        { type: "list-item", content: isKo
+          ? "10개 채널 실험, 1개 채널 발견"
+          : "Experiment with 10 channels, discover 1 that works", bulletColor: "blue" },
+        { type: "list-item", content: isKo
+          ? "CAC(고객획득비용) vs LTV(고객생애가치) 계산 시작"
+          : "Start calculating CAC vs LTV", bulletColor: "blue" },
+        { type: "list-item", content: isKo
+          ? "광고? 콘텐츠? 커뮤니티? SEO? — 정답은 숫자가 알려줌"
+          : "Ads? Content? Community? SEO? — Numbers tell the answer", bulletColor: "blue" },
+        { type: "list-item", content: isKo
+          ? "작동하지 않는 것은 빠르게 버리기"
+          : "Quickly abandon what doesn't work", bulletColor: "blue" },
+        { type: "blank", content: "" },
+        { type: "dim", content: isKo
+          ? "\"모든 채널이 작동하지 않는다. 당신의 채널을 찾아라.\""
+          : "\"Not all channels work. Find yours.\"" },
+        { type: "blank", content: "" },
+
+        // Week 6-7
+        { type: "success", content: isKo ? "Week 6-7: 반복 가능한 성장 공식" : "Week 6-7: Repeatable Growth Formula", bullet: true },
+        { type: "blank", content: "" },
+        { type: "list-item", content: isKo
+          ? "작동하는 채널에 리소스 집중"
+          : "Focus resources on working channels", bulletColor: "blue" },
+        { type: "list-item", content: isKo
+          ? "\"이렇게 하면 이만큼 자란다\"는 공식 확립"
+          : "Establish \"do this, grow this much\" formula", bulletColor: "blue" },
+        { type: "list-item", content: isKo
+          ? "후속 투자 시 설명할 성장 스토리 구체화"
+          : "Concretize growth story for follow-up investment", bulletColor: "blue" },
+        { type: "list-item", content: isKo
+          ? "Unit Economics 정리"
+          : "Organize Unit Economics", bulletColor: "blue" },
+        { type: "blank", content: "" },
+        { type: "dim", content: isKo
+          ? "\"운이 아니라 시스템으로 자라는 구조를 만든다.\""
+          : "\"Build a structure that grows by system, not luck.\"" },
+        { type: "blank", content: "" },
+
+        // Week 8
+        { type: "success", content: isKo ? "Week 8: 증명" : "Week 8: Prove It", bullet: true },
+        { type: "blank", content: "" },
+        { type: "list-item", content: isKo
+          ? "8주간의 ARR 성장 그래프 공개"
+          : "Reveal 8-week ARR growth graph", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "50+ VC 앞에서 숫자로 피칭"
+          : "Pitch with numbers in front of 50+ VCs", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "후속 라운드 연결"
+          : "Connect to follow-up rounds", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "다음 8주의 목표 설정"
+          : "Set goals for the next 8 weeks", bulletColor: "green" },
+        { type: "blank", content: "" },
+        { type: "dim", content: isKo
+          ? "\"피치덱이 아니라 대시보드로 설득한다.\""
+          : "\"Convince with dashboards, not pitch decks.\"" },
+        { type: "blank", content: "" },
+        { type: "dim", content: "─".repeat(50) },
+        { type: "blank", content: "" },
+
+        // 마무리
+        { type: "output", content: isKo
+          ? "시작할 때 ARR $0이어도 좋습니다."
+          : "Starting with $0 ARR is fine.", bullet: true },
+        { type: "output", content: isKo
+          ? "8주 후 $0이 아니면 됩니다."
+          : "Just don't end with $0." },
         { type: "blank", content: "" },
         { type: "blink", content: isKo ? "Enter를 눌러 계속하세요..." : "Press Enter to continue..." },
         { type: "blank", content: "" },

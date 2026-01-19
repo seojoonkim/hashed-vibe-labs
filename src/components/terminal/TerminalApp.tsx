@@ -237,17 +237,20 @@ export default function TerminalApp() {
 
   const generateId = () => lineIdRef.current++;
 
-  // Scroll to bottom helper
-  const scrollToBottom = useCallback(() => {
+  // Scroll to bottom helper - use instant scroll on mobile for better UX
+  const scrollToBottom = useCallback((instant = false) => {
+    // Double requestAnimationFrame ensures DOM has updated
     requestAnimationFrame(() => {
-      if (terminalBodyRef.current) {
-        terminalBodyRef.current.scrollTo({
-          top: terminalBodyRef.current.scrollHeight,
-          behavior: "smooth"
-        });
-      }
+      requestAnimationFrame(() => {
+        if (terminalBodyRef.current) {
+          terminalBodyRef.current.scrollTo({
+            top: terminalBodyRef.current.scrollHeight,
+            behavior: instant || isMobile ? "instant" : "smooth"
+          });
+        }
+      });
     });
-  }, []);
+  }, [isMobile]);
 
   // Add lines with typing effect
   const addLines = useCallback(async (newLines: Omit<TerminalLine, "id">[], delay = ANIMATION_SPEED) => {
@@ -266,6 +269,8 @@ export default function TerminalApp() {
 
       // Add line with typing cursor
       setLines(prev => [...prev, { ...line, id: lineId, isTyping: true }]);
+
+      // Scroll after state update - scrollToBottom uses double RAF internally
       scrollToBottom();
 
       await new Promise(resolve => setTimeout(resolve, delay));
@@ -282,6 +287,8 @@ export default function TerminalApp() {
       // Remove typing cursor after delay
       setLines(prev => prev.map(l => l.id === lineId ? { ...l, isTyping: false } : l));
     }
+    // Final scroll to ensure we're at the bottom
+    scrollToBottom();
     isTypingRef.current = false;
     setIsTyping(false);
   }, [scrollToBottom]);
@@ -382,10 +389,12 @@ export default function TerminalApp() {
 
     const timer = setTimeout(() => {
       setAsciiLineIndex(prev => prev + 1);
+      // Scroll on mobile as ASCII lines are added
+      if (isMobile) scrollToBottom();
     }, ASCII_LINE_DELAY);
 
     return () => clearTimeout(timer);
-  }, [heroStep, asciiLineIndex, totalAsciiLines]);
+  }, [heroStep, asciiLineIndex, totalAsciiLines, isMobile, scrollToBottom]);
 
   // Tagline line-by-line animation (after ASCII completes)
   useEffect(() => {
@@ -394,10 +403,12 @@ export default function TerminalApp() {
 
     const timer = setTimeout(() => {
       setTaglineIndex(prev => prev + 1);
+      // Scroll on mobile as taglines are added
+      if (isMobile) scrollToBottom();
     }, ANIMATION_SPEED * 3); // Slower for readability
 
     return () => clearTimeout(timer);
-  }, [asciiLineIndex, taglineIndex, totalAsciiLines]);
+  }, [asciiLineIndex, taglineIndex, totalAsciiLines, isMobile, scrollToBottom]);
 
   // Show loading animation
   const showLoading = useCallback(async (sectionId: string): Promise<boolean> => {

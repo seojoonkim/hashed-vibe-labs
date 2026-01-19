@@ -655,16 +655,17 @@ export default function TerminalApp() {
 
   return (
     <div className={`min-h-[100dvh] h-[100dvh] bg-[#0d0d0d] text-[#d8d8d8] font-mono flex flex-col overflow-hidden ${isMobile ? 'pb-[env(safe-area-inset-bottom)]' : 'p-[10px]'} text-sm relative`}>
-      <style jsx>{`
-        @keyframes glowPulse {
-          0%, 100% { box-shadow: 0 0 40px 10px rgba(224, 122, 95, 0.04), 0 0 80px 40px rgba(224, 122, 95, 0.02); }
-          50% { box-shadow: 0 0 50px 15px rgba(224, 122, 95, 0.08), 0 0 100px 50px rgba(224, 122, 95, 0.04); }
-        }
-      `}</style>
       {/* Terminal window with border and glow effect */}
-      <div
+      <motion.div
         className={`flex-1 flex flex-col overflow-hidden overflow-x-hidden bg-[#1a1a1a] ${isMobile ? '' : 'border border-[#333] rounded-lg'}`}
-        style={!isMobile ? { animation: 'glowPulse 4s ease-in-out infinite' } : undefined}
+        animate={!isMobile ? {
+          boxShadow: [
+            '0 0 40px 10px rgba(224, 122, 95, 0.04), 0 0 80px 40px rgba(224, 122, 95, 0.02)',
+            '0 0 50px 15px rgba(224, 122, 95, 0.08), 0 0 100px 50px rgba(224, 122, 95, 0.04)',
+            '0 0 40px 10px rgba(224, 122, 95, 0.04), 0 0 80px 40px rgba(224, 122, 95, 0.02)'
+          ]
+        } : undefined}
+        transition={!isMobile ? { duration: 4, repeat: Infinity, ease: "easeInOut" } : undefined}
       >
       {/* Terminal Header - Fixed */}
       <div className={`flex-shrink-0 bg-[#252525] border-b border-[#333] ${isMobile ? '' : 'rounded-t-lg'}`}>
@@ -980,7 +981,7 @@ export default function TerminalApp() {
 
         {/* Bottom padding for fixed input */}
         <div className="h-10" />
-      </div>
+        </div>
       </div>
 
       {/* Status bar - terminal metrics */}
@@ -1090,7 +1091,7 @@ export default function TerminalApp() {
           </>
         )}
       </AnimatePresence>
-      </div>
+      </motion.div>
     </div>
   );
 }

@@ -782,7 +782,7 @@ export default function TerminalApp() {
       </div>
 
       {/* Status bar - terminal metrics */}
-      <div className="flex-shrink-0 bg-[#1a1a1a] border-t border-[#333] px-3 py-0.5">
+      <div className="flex-shrink-0 bg-[#1a1a1a] px-3 border-t border-[#333]">
         <div className={`${isMobile ? '' : 'max-w-[900px] mx-auto w-full'} flex items-center justify-between text-[10px] text-[#555]`}>
           <div className="flex items-center gap-3">
             <span>MEM: 48MB</span>
@@ -802,7 +802,7 @@ export default function TerminalApp() {
         className="flex-shrink-0 bg-[#1a1a1a] cursor-pointer group rounded-b-lg"
         onClick={() => openMenu()}
       >
-        <div className={`${isMobile ? 'px-4' : 'max-w-[900px] mx-auto w-full px-6'} py-3`}>
+        <div className={`${isMobile ? 'px-4' : 'max-w-[900px] mx-auto w-full px-6'} py-2`}>
           <div className="flex items-center">
             <span className="text-[#666] mr-2">{">"}</span>
             <motion.span

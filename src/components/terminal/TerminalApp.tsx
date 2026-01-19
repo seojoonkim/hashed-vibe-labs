@@ -1374,7 +1374,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
       });
       lines.push(
         { type: "blank", content: "" },
-        { type: "header", content: isKo ? "[ 1-1. VIBE LABS란? ]" : "[ 1-1. WHAT IS VIBE LABS? ]", bullet: true },
+        { type: "header", content: isKo ? "1-1. VIBE LABS란?" : "1-1. WHAT IS VIBE LABS?", bullet: true },
         { type: "blank", content: "" },
         // 단락 1: Vibe Labs 정의
         { type: "output", content: isKo
@@ -1515,7 +1515,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
       });
       lines.push(
         { type: "blank", content: "" },
-        { type: "header", content: isKo ? "[ 2-1. 누가 지원해야 할까요? ]" : "[ 2-1. WHO SHOULD APPLY? ]", bullet: true },
+        { type: "header", content: isKo ? "2-1. 누가 지원해야 할까요?" : "2-1. WHO SHOULD APPLY?", bullet: true },
         { type: "blank", content: "" },
         { type: "output", content: isKo
           ? "바이브 코딩 시대, 창업자의 역할이 달라지고 있다고 느낍니다."
@@ -1654,7 +1654,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
       });
       lines.push(
         { type: "blank", content: "" },
-        { type: "header", content: isKo ? "[ 3-1. 프로그램 구조 ]" : "[ 3-1. PROGRAM STRUCTURE ]", bullet: true },
+        { type: "header", content: isKo ? "3-1. 프로그램 구조" : "3-1. PROGRAM STRUCTURE", bullet: true },
         { type: "blank", content: "" },
         { type: "output", content: isKo
           ? "일회성 행사나 강의 중심 프로그램과는 다른 방식을 시도합니다."

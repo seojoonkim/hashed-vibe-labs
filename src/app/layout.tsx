@@ -9,31 +9,32 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "Hashed Vibe Camp | AI-Native Founder Early Selection System",
-  description:
-    "AI-native 파운더를 매우 이른 단계에서 식별하고, 확신이 서는 팀에 직접 투자하는 조기 선발 시스템",
+  title: "Hashed Vibe Labs",
+  description: "8-week builder program for AI-native founders in Seoul",
   keywords: [
     "Hashed",
-    "Vibe Camp",
+    "Vibe Labs",
     "AI",
     "Startup",
     "Investment",
     "Accelerator",
     "Seoul",
     "Founder",
+    "Builder",
   ],
   authors: [{ name: "Hashed" }],
   openGraph: {
-    title: "Hashed Vibe Camp | AI-Native Founder Early Selection System",
-    description:
-      "AI-native 파운더를 매우 이른 단계에서 식별하고, 확신이 서는 팀에 직접 투자하는 조기 선발 시스템",
+    title: "Hashed Vibe Labs",
+    description: "8-week builder program for AI-native founders in Seoul",
     type: "website",
     locale: "ko_KR",
+    siteName: "Hashed Vibe Labs",
   },
+  metadataBase: new URL("https://hashed-vibe-labs.vercel.app"),
   twitter: {
     card: "summary_large_image",
-    title: "Hashed Vibe Camp",
-    description: "AI-Native Founder Early Selection System",
+    title: "Hashed Vibe Labs",
+    description: "8-week builder program for AI-native founders in Seoul",
   },
 };
 

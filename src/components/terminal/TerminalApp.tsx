@@ -531,9 +531,9 @@ export default function TerminalApp() {
               <div className="w-3 h-3 rounded-full bg-[#ffbd2e]" />
               <div className="w-3 h-3 rounded-full bg-[#27c93f]" />
             </div>
-            {/* Terminal title with PID */}
+            {/* Terminal title */}
             <span className="text-[#888] text-sm ml-2">
-              hashed — vibe-labs-seoul-2026 <span className="text-[#555]">(pid: 2847)</span>
+              hashed — vibe-labs-seoul-2026
             </span>
           </div>
           {/* Countdown on desktop - only render when mounted to avoid hydration mismatch */}
@@ -546,10 +546,11 @@ export default function TerminalApp() {
         </div>
       </div>
 
-      {/* Scrollable content area - scrollbar at screen edge */}
+      {/* Scrollable content area - hide scrollbar */}
       <div
-        className="overflow-y-auto overflow-x-hidden flex-1"
+        className="overflow-y-auto overflow-x-hidden flex-1 hide-scrollbar"
         ref={terminalBodyRef}
+        style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
         <div className={`${isMobile ? 'px-4' : 'max-w-[900px] mx-auto w-full px-6'} pt-6`}>
           {/* Hero Section - Claude Code Style */}
@@ -601,21 +602,22 @@ export default function TerminalApp() {
 
               {/* Big ASCII art - HASHED & VIBE LABS (line by line) */}
               {heroStep >= 5 && (
-                <div className="overflow-x-hidden ascii-scanline">
-                  <div className={`text-[#e07a5f] leading-none whitespace-pre font-mono mb-1 ascii-glow ascii-flicker ${isMobile ? 'text-[9px]' : 'text-xs sm:text-sm'}`} style={{ lineHeight: '1.2' }}>
+                <div className="overflow-hidden hide-scrollbar">
+                  <div className={`text-[#e07a5f] leading-none whitespace-pre font-mono mb-1 overflow-hidden hide-scrollbar ${isMobile ? 'text-[9px]' : 'text-xs sm:text-sm'}`} style={{ lineHeight: '1.2' }}>
                     {HASHED_ASCII.map((line, i) => (
                       i < asciiLineIndex && (
                         <motion.div
                           key={i}
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
+                          className="overflow-hidden"
                         >
                           {line}
                         </motion.div>
                       )
                     ))}
                   </div>
-                  <div className={`text-[#e07a5f] leading-none whitespace-pre font-mono mb-2 ascii-glow ascii-flicker ${isMobile ? 'text-[9px]' : 'text-xs sm:text-sm'}`} style={{ lineHeight: '1.2' }}>
+                  <div className={`text-[#e07a5f] leading-none whitespace-pre font-mono mb-2 overflow-hidden hide-scrollbar ${isMobile ? 'text-[9px]' : 'text-xs sm:text-sm'}`} style={{ lineHeight: '1.2' }}>
                     {VIBELABS_ASCII.map((line, i) => {
                       const globalIndex = HASHED_ASCII.length + i;
                       return globalIndex < asciiLineIndex && (
@@ -623,6 +625,7 @@ export default function TerminalApp() {
                           key={i}
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
+                          className="overflow-hidden"
                         >
                           {line}
                         </motion.div>
@@ -732,8 +735,8 @@ export default function TerminalApp() {
               {heroStep >= 6 && taglineIndex >= totalTaglines && currentSectionIndex === -1 && (
                 <motion.div
                   key="login-message"
-                  initial={{ opacity: 0, y: 4 }}
-                  animate={{ opacity: [0.4, 1, 0.4], y: 0 }}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: [0.4, 1, 0.4] }}
                   transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut", delay: 0.3 }}
                   className="mb-4"
                 >
@@ -779,10 +782,25 @@ export default function TerminalApp() {
       </div>
       </div>
 
+      {/* Status bar - terminal metrics */}
+      <div className="flex-shrink-0 bg-[#1a1a1a] border-t border-[#333] px-3 py-0.5">
+        <div className={`${isMobile ? '' : 'max-w-[900px] mx-auto w-full'} flex items-center justify-between text-[10px] text-[#555]`}>
+          <div className="flex items-center gap-3">
+            <span>MEM: 48MB</span>
+            <span>CPU: 2%</span>
+          </div>
+          <div className="flex items-center gap-3">
+            <span>UTF-8</span>
+            <span>LF</span>
+            <span>{isKo ? "한국어" : "English"}</span>
+          </div>
+        </div>
+      </div>
+
       {/* Input prompt - fixed at bottom */}
       <div
         ref={inputRef}
-        className="flex-shrink-0 bg-[#1a1a1a] border-t border-[#333] cursor-pointer group rounded-b-lg"
+        className="flex-shrink-0 bg-[#1a1a1a] cursor-pointer group rounded-b-lg"
         onClick={() => openMenu()}
       >
         <div className={`${isMobile ? 'px-4' : 'max-w-[900px] mx-auto w-full px-6'} py-3`}>
@@ -1019,7 +1037,7 @@ function TerminalLineComponent({ line, isMobile, isLastBlink = false }: { line: 
     case "ascii":
       return (
         <motion.div
-          className={`font-mono ${isMobile ? 'text-[9px]' : 'text-sm'} leading-tight whitespace-pre overflow-x-hidden`}
+          className={`font-mono ${isMobile ? 'text-[9px]' : 'text-sm'} leading-tight whitespace-pre overflow-hidden hide-scrollbar`}
           style={{ color: '#e07a5f', lineHeight: '1.2' }}
           {...lineAnimation}
         >

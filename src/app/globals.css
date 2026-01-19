@@ -55,7 +55,19 @@ body {
   font-family: 'JetBrains Mono', 'Pretendard Variable', 'Pretendard', 'SF Mono', 'Consolas', monospace;
 }
 
-/* Custom scrollbar - Claude style */
+/* Hide scrollbar utility class */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;  /* Chrome, Safari, Opera */
+  width: 0 !important;
+  height: 0 !important;
+}
+
+/* Custom scrollbar - Claude style (for main scrollbar) */
 ::-webkit-scrollbar {
   width: 8px;
   background: var(--background-dark);

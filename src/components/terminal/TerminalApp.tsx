@@ -1841,6 +1841,21 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
           ? "  · The Sandbox (아르헨티나) — 메타버스 플랫폼"
           : "  · The Sandbox (Argentina) — Metaverse platform" },
         { type: "blank", content: "" },
+        // Hashed Labs 관련 자료
+        { type: "dim", content: isKo
+          ? "📖 관련 자료:"
+          : "📖 Related materials:" },
+        { type: "link", content: isKo
+          ? "   → 해시드는 왜 블록체인 게임에 투자하는가?"
+          : "   → Why Blockchain Games?",
+          href: isKo
+            ? "https://medium.com/hashed-kr/why-hashed-does-invest-in-blockchain-games-66144ae924d9"
+            : "https://medium.com/hashed-official/why-blockchain-games-28b2ae742544" },
+        { type: "link", content: "   → [Hashed Labs] UGC Meets NFTs Within The Sandbox — Sebastien Borget",
+          href: "https://www.youtube.com/watch?v=ZQLy29qkrRE" },
+        { type: "link", content: "   → [Hashed Labs] Is NFT the Future of Blockchain Game? — Panel Discussion",
+          href: "https://www.youtube.com/watch?v=baCCOkq5ISo" },
+        { type: "blank", content: "" },
         { type: "dim", content: isKo
           ? "서울을 시작으로 샌프란시스코, 싱가포르, 방콕, 뱅갈루루, 아부다비에"
           : "With offices in Seoul, San Francisco, Singapore, Bangkok, Bengaluru,", bullet: true },

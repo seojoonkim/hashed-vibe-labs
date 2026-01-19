@@ -1737,29 +1737,162 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
           ? "일회성 행사나 강의 중심 프로그램과는 다른 방식을 시도합니다. 선발과 동시에 투자가 집행되는 실전 빌딩 프로그램입니다."
           : "We're trying a different approach from one-time events or lecture-based programs. A real building program where investment is executed upon selection.", bullet: true },
         { type: "blank", content: "" },
+        { type: "dim", content: "─".repeat(50) },
+        { type: "blank", content: "" },
 
         // Phase 1
         { type: "info", content: "Phase 1: Offline Entry Session", bullet: true },
-        { type: "dim", content: "Meetup" },
+        { type: "dim", content: "Meetup · 2026.01.30" },
         { type: "blank", content: "" },
-        { type: "output", content: isKo
-          ? "본 프로그램 시작 전, 잠재 지원자들이 모이는 네트워킹 밋업입니다. 이 자리에서 Hashed 팀과 직접 만나고, 다른 빌더들과 교류할 수 있습니다."
-          : "A networking meetup for potential applicants before the main program. Meet the Hashed team directly and network with other builders.", bullet: true },
+        { type: "list-item", content: isKo
+          ? "본 프로그램 시작 전 잠재 지원자들이 모이는 네트워킹 밋업"
+          : "A networking meetup for potential applicants before the main program", bulletColor: "blue" },
+        { type: "list-item", content: isKo
+          ? "Hashed 팀과 직접 만나고, 다른 빌더들과 교류"
+          : "Meet the Hashed team directly and network with other builders", bulletColor: "blue" },
+        { type: "blank", content: "" },
         { type: "dim", content: isKo
           ? "※ 밋업 참여가 선발에 직접적인 영향을 주지는 않습니다."
           : "※ Meetup participation does not directly affect selection." },
+        { type: "blank", content: "" },
+        { type: "dim", content: "─".repeat(50) },
         { type: "blank", content: "" },
 
         // Phase 2
         { type: "info", content: "Phase 2: Vibe Labs Seoul", bullet: true },
         { type: "dim", content: isKo ? "Core Program · 약 8주" : "Core Program · ~8 weeks" },
         { type: "blank", content: "" },
+
+        // 선발과 동시에 투자
+        { type: "success", content: isKo ? "선발과 동시에 투자" : "Investment Upon Selection", bullet: true },
+        { type: "list-item", content: isKo
+          ? "5% 지분에 1억원 투자, 선발 발표 즉시 집행"
+          : "₩100M investment for 5% equity, executed immediately upon selection", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "복잡한 협상 없이 동일한 조건으로 시작"
+          : "Start with identical terms, no complex negotiations", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "투자금은 제품 개발과 실험에 자유롭게 사용"
+          : "Use investment freely for product development and experimentation", bulletColor: "green" },
+        { type: "blank", content: "" },
+
+        // 상시 연결된 빌더 커뮤니티
+        { type: "success", content: isKo ? "상시 연결된 빌더 커뮤니티" : "Always-Connected Builder Community", bullet: true },
+        { type: "list-item", content: isKo
+          ? "온라인으로 상시 교류하는 빌더 네트워크"
+          : "Builder network with constant online communication", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "서로의 진행 상황을 실시간으로 공유"
+          : "Share progress with each other in real-time", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "막힐 때 바로 도움받을 수 있는 환경"
+          : "Environment where you can get help immediately when stuck", bulletColor: "green" },
+        { type: "blank", content: "" },
+
+        // 매주 밀도 있는 세션
+        { type: "success", content: isKo ? "매주 밀도 있는 세션" : "Weekly High-Density Sessions", bullet: true },
+        { type: "list-item", content: isKo
+          ? "주 1회 Go-To-Market 전략 멘토링"
+          : "Weekly Go-To-Market strategy mentoring", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "업계 최고 수준의 바이브 코더로부터 기술 코칭"
+          : "Technical coaching from top-tier vibe coders", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "배치 내 상호 피드백 및 학습 교류 세션"
+          : "Peer feedback and learning sessions within the batch", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "다양한 관점에서 통찰과 자극을 받는 환경"
+          : "Environment for insights and inspiration from diverse perspectives", bulletColor: "green" },
+        { type: "blank", content: "" },
+
+        // Hashed의 관찰과 지원
+        { type: "success", content: isKo ? "Hashed의 관찰과 지원" : "Hashed's Observation & Support", bullet: true },
+        { type: "list-item", content: isKo
+          ? "팀의 빌드 속도와 제품 진화를 밀도 있게 관찰"
+          : "Closely observe team's build speed and product evolution", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "필요한 순간에 네트워크와 리소스를 연결"
+          : "Connect network and resources when needed", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "강제적인 보고 의무나 불필요한 간섭 없음"
+          : "No mandatory reporting or unnecessary interference", bulletColor: "green" },
+        { type: "blank", content: "" },
+        { type: "dim", content: "─".repeat(50) },
+        { type: "blank", content: "" },
+
+        // Phase 3
+        { type: "info", content: "Phase 3: Demo Day & Beyond", bullet: true },
+        { type: "dim", content: isKo ? "8주 후" : "After 8 weeks" },
+        { type: "blank", content: "" },
+
+        // 데모데이
+        { type: "success", content: isKo ? "데모데이" : "Demo Day", bullet: true },
+        { type: "list-item", content: isKo
+          ? "8주간의 결과물을 투자자와 빌더 커뮤니티에 공개"
+          : "Present 8 weeks of results to investors and builder community", bulletColor: "yellow" },
+        { type: "list-item", content: isKo
+          ? "국내외 50+ VC에 온·오프라인으로 직접 소개"
+          : "Direct introduction to 50+ domestic and global VCs online and offline", bulletColor: "yellow" },
+        { type: "list-item", content: isKo
+          ? "Hashed LP 네트워크 내 50+ 유관 기업 중 사업 연계 가능한 파트너에 선별 연결"
+          : "Selective connection to business partners from 50+ companies in Hashed LP network", bulletColor: "yellow" },
+        { type: "blank", content: "" },
+
+        // 지속적인 관계
+        { type: "success", content: isKo ? "지속적인 관계" : "Ongoing Relationship", bullet: true },
+        { type: "list-item", content: isKo
+          ? "Hashed 포트폴리오 네트워크 영구 합류"
+          : "Permanent access to Hashed portfolio network", bulletColor: "yellow" },
+        { type: "list-item", content: isKo
+          ? "후속 배치 창업자들과의 커뮤니티"
+          : "Community with founders from subsequent batches", bulletColor: "yellow" },
+        { type: "list-item", content: isKo
+          ? "글로벌 확장 시 각 지역 파트너 연결"
+          : "Regional partner connections for global expansion", bulletColor: "yellow" },
+        { type: "blank", content: "" },
+        { type: "dim", content: "─".repeat(50) },
+        { type: "blank", content: "" },
+
+        // 우리가 제공하지 않는 것
+        { type: "header", content: isKo ? "우리가 제공하지 않는 것" : "WHAT WE DON'T OFFER", bullet: true },
+        { type: "blank", content: "" },
+        { type: "dim", content: isKo
+          ? "✗ 정해진 커리큘럼이나 강의"
+          : "✗ Fixed curriculum or lectures" },
+        { type: "dim", content: isKo
+          ? "✗ 주간 보고서나 진행상황 발표 의무"
+          : "✗ Mandatory weekly reports or progress presentations" },
+        { type: "dim", content: isKo
+          ? "✗ \"피봇하세요\" 같은 간섭"
+          : "✗ Interference like \"you should pivot\"" },
+        { type: "dim", content: isKo
+          ? "✗ 엑셀러레이터식 획일적 조건"
+          : "✗ Cookie-cutter accelerator terms" },
+        { type: "blank", content: "" },
+
+        // 우리가 제공하는 것
+        { type: "header", content: isKo ? "우리가 제공하는 것" : "WHAT WE OFFER", bullet: true },
+        { type: "blank", content: "" },
+        { type: "list-item", content: isKo
+          ? "선발 즉시 집행되는 1억원 투자"
+          : "₩100M investment executed immediately upon selection", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "같은 속도로 달리는 동료들"
+          : "Peers running at the same speed", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "매주 성장을 자극하는 멘토링과 코칭"
+          : "Weekly mentoring and coaching that stimulates growth", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "필요할 때 연결되는 VC·기업 네트워크"
+          : "VC and corporate network connected when needed", bulletColor: "green" },
+        { type: "blank", content: "" },
+        { type: "dim", content: "─".repeat(50) },
+        { type: "blank", content: "" },
+
+        // 마무리 비전
         { type: "output", content: isKo
-          ? "최종 선발된 3–5팀이 참여하는 본 프로그램입니다. 선발 발표와 동시에 Hashed가 직접 투자를 집행합니다."
-          : "The main program for 3-5 selected teams. Hashed executes direct investment upon selection announcement.", bullet: true },
-        { type: "output", content: isKo
-          ? "약 8주간 각 팀의 빌드 속도와 제품 진화를 밀도 있게 관찰하고, 필요한 순간에 Hashed의 네트워크와 리소스를 연결합니다."
-          : "Closely observe each team's build speed and product evolution for ~8 weeks, connecting Hashed's network and resources when needed." },
+          ? "\"지금 만들고 있는 것이, 8주 후에는 세상에 없던 제품이 됩니다.\""
+          : "\"What you're building now will become a product the world has never seen in 8 weeks.\"", bullet: true },
         { type: "blank", content: "" },
         { type: "blink", content: isKo ? "Enter를 눌러 계속하세요..." : "Press Enter to continue..." },
         { type: "blank", content: "" },

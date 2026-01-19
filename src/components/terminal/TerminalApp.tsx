@@ -635,13 +635,14 @@ export default function TerminalApp() {
         return;
       }
 
-      // Number key shortcuts (1-9) - direct command execution without opening menu
+      // Number key shortcuts (1-9) - open menu with cursor on that item
       if (/^[1-9]$/.test(e.key)) {
         e.preventDefault();
         const num = parseInt(e.key);
-        const matchingCommand = MENU_COMMANDS.find(cmd => cmd.command.startsWith(`[${num}]`));
-        if (matchingCommand) {
-          handleCommand(matchingCommand.id);
+        const commandIndex = MENU_COMMANDS.findIndex(cmd => cmd.command.startsWith(`[${num}]`));
+        if (commandIndex !== -1) {
+          setSelectedMenuIndex(commandIndex);
+          setIsMenuOpen(true);
         }
         return;
       }

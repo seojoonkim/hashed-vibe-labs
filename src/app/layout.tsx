@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     siteName: "Hashed Vibe Labs",
     images: [
       {
-        url: "/og-image.png?v=2",
+        url: "/og-image.png?v=3",
         width: 1200,
         height: 630,
         alt: "Hashed Vibe Labs",
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Hashed Vibe Labs",
     description: "8-week builder program for AI-native founders in Seoul",
-    images: ["/og-image.png?v=2"],
+    images: ["/og-image.png?v=3"],
   },
 };
 

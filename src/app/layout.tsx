@@ -10,7 +10,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: "Hashed Vibe Labs",
-  description: "8-week builder program for AI-native founders in Seoul",
+  description: "Where vibes become rocket products",
   keywords: [
     "Hashed",
     "Vibe Labs",
@@ -25,7 +25,7 @@ export const metadata: Metadata = {
   authors: [{ name: "Hashed" }],
   openGraph: {
     title: "Hashed Vibe Labs",
-    description: "8-week builder program for AI-native founders in Seoul",
+    description: "Where vibes become rocket products",
     type: "website",
     locale: "ko_KR",
     siteName: "Hashed Vibe Labs",
@@ -42,7 +42,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Hashed Vibe Labs",
-    description: "8-week builder program for AI-native founders in Seoul",
+    description: "Where vibes become rocket products",
     images: ["/og-image.png?v=3"],
   },
 };

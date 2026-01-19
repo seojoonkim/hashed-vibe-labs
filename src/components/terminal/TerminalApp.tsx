@@ -1448,6 +1448,23 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
           ? "며칠 안에 작동하는 프로토타입, 다음 날 피벗 가능"
           : "Working prototype in days, pivot the next day" },
         { type: "blank", content: "" },
+        // Hashed Labs 2019 트랙레코드
+        { type: "output", content: isKo
+          ? "참고로 해시드는 2019년 초, 블록체인 게임 섹터를 대상으로"
+          : "In early 2019, Hashed ran 'Hashed Labs'—a 3-month", bullet: true },
+        { type: "output", content: isKo
+          ? "'Hashed Labs'라는 3개월간의 초기투자 및 지원 프로그램을 운영했습니다."
+          : "early-stage investment program focused on blockchain gaming." },
+        { type: "success", content: isKo
+          ? "당시 5개 팀 중 2개가 유니콘이 되었습니다:"
+          : "2 out of 5 teams became unicorns:" },
+        { type: "info", content: isKo
+          ? "  · Sky Mavis (베트남) — Axie Infinity"
+          : "  · Sky Mavis (Vietnam) — Axie Infinity" },
+        { type: "info", content: isKo
+          ? "  · The Sandbox (아르헨티나) — 메타버스 플랫폼"
+          : "  · The Sandbox (Argentina) — Metaverse platform" },
+        { type: "blank", content: "" },
         // YC 사례
         { type: "output", content: isKo
           ? "Y Combinator 2025년 Winter 배치에서"

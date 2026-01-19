@@ -31,7 +31,7 @@ export const metadata: Metadata = {
     siteName: "Hashed Vibe Labs",
     images: [
       {
-        url: "/og-image.png?v=3",
+        url: "/og-image.png?v=4",
         width: 1200,
         height: 630,
         alt: "Hashed Vibe Labs",
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "Hashed Vibe Labs",
     description: "Where vibes become rocket products",
-    images: ["/og-image.png?v=3"],
+    images: ["/og-image.png?v=4"],
   },
 };
 

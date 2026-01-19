@@ -233,6 +233,7 @@ export default function TerminalApp() {
   const [heroLoadingStep, setHeroLoadingStep] = useState(0); // 0: not started, 1: thinking, 2: loading messages, 3: done
   const terminalBodyRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLDivElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const lineIdRef = useRef(0);
   const heroAnimatedRef = useRef(false);
   const isTypingRef = useRef(false); // Ref for immediate typing state check
@@ -242,6 +243,20 @@ export default function TerminalApp() {
   const isKo = language === "ko";
 
   const generateId = () => lineIdRef.current++;
+
+  // Close menu when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (isMenuOpen && menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isMenuOpen]);
 
   // Auto-scroll when lines change - ensures DOM is updated before scrolling
   const prevLinesLengthRef = useRef(0);
@@ -1110,9 +1125,10 @@ export default function TerminalApp() {
               {/* Invisible click-away layer (no dim) - outside AnimatePresence */}
               {isMenuOpen && (
                 <div
-                  className="fixed inset-0"
-                  style={{ zIndex: 9998 }}
-                  onClick={(e) => {
+                  className="fixed inset-0 cursor-default"
+                  style={{ zIndex: 9998, pointerEvents: 'auto' }}
+                  onMouseDown={(e) => {
+                    e.preventDefault();
                     e.stopPropagation();
                     closeMenu();
                   }}
@@ -1123,6 +1139,7 @@ export default function TerminalApp() {
               <AnimatePresence>
                 {isMenuOpen && (
                   <motion.div
+                      ref={menuRef}
                       className="absolute bg-[#333] border border-[#555] rounded overflow-hidden shadow-2xl"
                       style={{
                         zIndex: 9999,

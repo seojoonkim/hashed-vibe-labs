@@ -2661,10 +2661,9 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
         { type: "dim", content: "─".repeat(50) },
         { type: "blank", content: "" },
-        { type: "link", content: isKo
-          ? "→ 지원하기"
-          : "→ Apply now",
-          href: "https://hashed.com/vibelabs" },
+        { type: "success", content: isKo
+          ? "→ 지원하기: 2월 1일에 오픈합니다"
+          : "→ Apply: Opens February 1st", bullet: true },
         { type: "blank", content: "" },
         { type: "blink", content: isKo ? "Enter를 눌러 계속하세요..." : "Press Enter to continue..." },
         { type: "blank", content: "" },

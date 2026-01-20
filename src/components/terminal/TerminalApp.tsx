@@ -1691,10 +1691,10 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
         { type: "header", content: isKo ? "1-1. VIBE LABS란?" : "1-1. WHAT IS VIBE LABS?", bullet: true },
         { type: "blank", content: "" },
-        // 단락 1: Vibe Labs 정의
-        { type: "output", content: isKo
-          ? "Hashed Vibe Labs는 기존의 교육 프로그램이나 액셀러레이터와는 조금 다릅니다."
-          : "Hashed Vibe Labs is a bit different from traditional education programs or accelerators.", bullet: true },
+        // 단락 1: Vibe Labs 정의 - 핵심 가치 명확화
+        { type: "success", content: isKo
+          ? "AI를 동료로 쓰는 창업자에게, 자본보다 빠른 신뢰와 유통을 제공하는 8주 프로그램입니다."
+          : "An 8-week program providing trust and distribution faster than capital to founders who use AI as a partner.", bullet: true },
         { type: "blank", content: "" },
         // 단락 2: 무엇을 하는가
         { type: "output", content: isKo
@@ -1705,7 +1705,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
           : "We invest immediately in teams we believe in, and join them for ~8 weeks of intensive building." },
         { type: "blank", content: "" },
         // 단락 3: 핵심 요약
-        { type: "success", content: isKo
+        { type: "info", content: isKo
           ? "한마디로, 투자를 전제로 설계된 조기 선발 시스템입니다."
           : "In short: an early selection system designed with investment in mind.", bullet: true },
         { type: "blank", content: "" },
@@ -1728,25 +1728,33 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         // Why Now? 섹션
         { type: "header", content: isKo ? "1-2. 왜 지금인가?" : "1-2. WHY NOW?", bullet: true },
         { type: "blank", content: "" },
-        // 단락 1: 도입 - 역삼각형 개념
+        // 단락 1: 협곡의 소멸
+        { type: "output", content: isKo
+          ? "과거에는 아이디어와 구현 사이에 거대한 협곡이 있었습니다. 그 협곡을 건너려면 개발팀을 꾸리고, 자금을 조달하고, 몇 달을 기다려야 했습니다."
+          : "In the past, there was a huge canyon between idea and implementation. Crossing it required building a dev team, raising funds, and waiting months.", bullet: true },
+        { type: "blank", content: "" },
+        { type: "success", content: isKo
+          ? "지금 그 협곡이 사라지고 있습니다. 사실상 처음으로, 생각의 속도와 실행의 속도가 같아지고 있습니다."
+          : "That canyon is disappearing. For the first time ever, the speed of thought and the speed of execution are becoming equal.", bullet: true },
+        { type: "blank", content: "" },
+        // 역삼각형 개념
         { type: "output", content: isKo
           ? "과거의 개발 인재상이 '깊은 기술적 구현력'을 기반으로 한 정삼각형(▲)이었다면, 바이브 코딩 시대의 인재는 '넓은 비즈니스 커버리지'를 가진 역삼각형(▼)입니다."
           : "If the past ideal developer was a triangle (▲) based on 'deep technical implementation', the vibe coding era demands an inverted triangle (▼) with 'wide business coverage'.", bullet: true },
-        { type: "blank", content: "" },
         { type: "info", content: isKo
           ? "이제 깊이는 AI가, 넓이는 인간이 담당합니다."
-          : "Now, AI handles depth, humans handle breadth.", bullet: true },
+          : "Now, AI handles depth, humans handle breadth." },
         { type: "blank", content: "" },
         // 과거 vs 지금 비교
-        { type: "dim", content: isKo ? "2022년:" : "2022:", bullet: true },
+        { type: "dim", content: isKo ? "과거:" : "Past:", bullet: true },
         { type: "error", content: isKo
-          ? "MVP 출시까지 6개월, 시장 검증까지 1년"
-          : "6 months to MVP, 1 year to market validation" },
+          ? "MVP 출시까지 6개월, 시장 검증까지 1년. 대부분의 아이디어는 \"언젠가 개발팀이 생기면\"이라는 말과 함께 협곡 앞에서 죽었습니다."
+          : "6 months to MVP, 1 year to market validation. Most ideas died at the canyon with \"someday when we have a dev team.\"" },
         { type: "blank", content: "" },
-        { type: "dim", content: isKo ? "2025년:" : "2025:", bullet: true },
+        { type: "dim", content: isKo ? "지금:" : "Now:", bullet: true },
         { type: "success", content: isKo
-          ? "며칠 안에 작동하는 프로토타입, 다음 날 피벗 가능"
-          : "Working prototype in days, pivot the next day" },
+          ? "머릿속에 떠오른 것을 오늘 저녁에 만들어서 내일 아침에 사용자에게 보여줄 수 있습니다."
+          : "You can build what's in your head tonight and show it to users tomorrow morning." },
         { type: "blank", content: "" },
         // YC 사례
         { type: "output", content: isKo
@@ -1759,7 +1767,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
           : "\"You don't need teams of 50 or 100 engineers. You can raise less, and capital lasts much longer.\" — Garry Tan, YC CEO", bullet: true },
         { type: "blank", content: "" },
         // 핵심 메시지
-        { type: "output", content: isKo
+        { type: "info", content: isKo
           ? "'아이디어에서 실체화까지의 거리'가 근본적으로 바뀌었습니다. 설득 전에 증명이 가능한 시대입니다."
           : "The distance from 'idea to realization' has fundamentally changed. It's an era where you can prove before you persuade.", bullet: true },
         { type: "blank", content: "" },
@@ -1806,11 +1814,11 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
           ? "이더리움 재단 전 기술 이사"
           : "Former technical director of Ethereum Foundation", bulletColor: "green" },
         { type: "list-item", content: isKo
-          ? "글로벌 크립토 데이터 분석 플랫폼 창업자"
-          : "Founder of leading crypto data analytics platform", bulletColor: "green" },
+          ? "국내 대표 생성형 엔진 최적화 기업 창업자"
+          : "Founder of leading generative engine optimization in Korea", bulletColor: "green" },
         { type: "list-item", content: isKo
-          ? "국내 대표 소셜 레저 플랫폼 전 창업자"
-          : "Former founder of leading social leisure platform in Korea", bulletColor: "green" },
+          ? "글로벌 팔로워를 보유한 디지털 자산 분석 플랫폼 창업자"
+          : "Founder of leading digital asset analysis platform with a massive global following", bulletColor: "green" },
         { type: "blank", content: "" },
         { type: "blink", content: isKo ? "Enter를 눌러 계속하세요..." : "Press Enter to continue..." },
         { type: "blank", content: "" },
@@ -1881,6 +1889,9 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "list-item", content: isKo
           ? "빠르게 만들고, 빠르게 고치고, 빠르게 배우는 반복 속도를 가진 사람"
           : "Those with fast iteration: build fast, fix fast, learn fast", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "사람을 움직일 수 있는 사람 — 설득하고, 협력을 이끌어내는 능력"
+          : "Those who can move people — ability to persuade and drive collaboration", bulletColor: "green" },
         { type: "blank", content: "" },
         { type: "error", content: isKo ? "✕ 이런 경우는 맞지 않습니다:" : "✕ Not a good fit:", bullet: true },
         { type: "list-item", content: isKo
@@ -2048,11 +2059,11 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         // 데모데이
         { type: "success", content: isKo ? "데모데이" : "Demo Day", bullet: true },
         { type: "list-item", content: isKo
-          ? "8주간의 결과물을 투자자와 빌더 커뮤니티에 공개"
-          : "Present 8 weeks of results to investors and builder community", bulletColor: "yellow" },
+          ? "피치덱이 아니라 대시보드로 이야기합니다. 50+ VC 앞에서 숫자로 피칭합니다."
+          : "Pitch with dashboards, not decks. Present with numbers in front of 50+ VCs.", bulletColor: "yellow" },
         { type: "list-item", content: isKo
-          ? "국내외 50+ VC에 온·오프라인으로 직접 소개"
-          : "Direct introduction to 50+ domestic and global VCs online and offline", bulletColor: "yellow" },
+          ? "8주간의 ARR 성장 그래프를 공개합니다"
+          : "Reveal your 8-week ARR growth graph", bulletColor: "yellow" },
         { type: "list-item", content: isKo
           ? "Hashed LP 네트워크 내 50+ 유관 기업 중 사업 연계 가능한 파트너에 선별 연결"
           : "Selective connection to business partners from 50+ companies in Hashed LP network", bulletColor: "yellow" },
@@ -2212,16 +2223,16 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
 
         // ARR 설명
-        { type: "info", content: isKo ? "ARR이란?" : "What is ARR?", bullet: true },
+        { type: "info", content: isKo ? "왜 ARR인가?" : "Why ARR?", bullet: true },
         { type: "blank", content: "" },
-        { type: "list-item", content: isKo
-          ? "Annual Recurring Revenue — 연간 반복 매출"
-          : "Annual Recurring Revenue — yearly recurring income", bulletColor: "cyan" },
-        { type: "list-item", content: isKo
-          ? "단순 매출이 아니라, '반복해서 들어오는 돈'"
-          : "Not just revenue, but 'money that keeps coming back'", bulletColor: "cyan" },
+        { type: "output", content: isKo
+          ? "AI를 쓰면 마케팅 문구 생성도 쉽고, 고객 유입도 쉽습니다. 그럴듯한 랜딩 페이지, 설득력 있는 카피 — 이 모든 것을 AI가 도와줍니다."
+          : "With AI, generating marketing copy and acquiring users is easy. Convincing landing pages, persuasive copy — AI helps with all of this.", bullet: true },
         { type: "blank", content: "" },
-        { type: "dim", content: isKo ? "왜 중요한가?" : "Why does it matter?" },
+        { type: "success", content: isKo
+          ? "AI가 만들어낼 수 없는 유일한 지표가 있습니다. 고객이 지갑을 여는 순간입니다."
+          : "There's one metric AI can't fake: the moment a customer opens their wallet.", bullet: true },
+        { type: "blank", content: "" },
         { type: "list-item", content: isKo
           ? "사용자가 돈을 낸다 = 진짜 문제를 풀고 있다는 증거"
           : "Users pay = proof you're solving a real problem", bulletColor: "green" },
@@ -2229,16 +2240,16 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
           ? "반복해서 낸다 = 제품이 습관이 되었다는 증거"
           : "They pay repeatedly = proof your product became a habit", bulletColor: "green" },
         { type: "list-item", content: isKo
-          ? "ARR 성장 속도 = 투자자가 보는 가장 강력한 신호"
-          : "ARR growth rate = the strongest signal investors look for", bulletColor: "green" },
+          ? "이것은 속일 수 없습니다. 그래서 우리는 ARR에 집착합니다."
+          : "This cannot be faked. That's why we obsess over ARR.", bulletColor: "green" },
         { type: "blank", content: "" },
         { type: "dim", content: isKo ? "ARR이 없다면?" : "No ARR yet?" },
         { type: "list-item", content: isKo
-          ? "2주 안에 첫 결제를 만드는 것이 절대 목표"
-          : "Absolute goal: get your first payment within 2 weeks", bulletColor: "yellow" },
+          ? "2주 안에 첫 결제를 만드는 것이 첫 번째 마일스톤"
+          : "First milestone: get your first payment within 2 weeks", bulletColor: "yellow" },
         { type: "list-item", content: isKo
-          ? "무료 사용자 1만 명보다 결제 사용자 100명이 더 강력한 신호"
-          : "100 paying users is a stronger signal than 10,000 free users", bulletColor: "yellow" },
+          ? "첫 $1이 가장 어렵습니다. 그 다음 $1,000은 훨씬 쉽습니다."
+          : "The first $1 is the hardest. The next $1,000 is much easier.", bulletColor: "yellow" },
         { type: "blank", content: "" },
         { type: "output", content: isKo
           ? "모든 멘토링, 코칭, 네트워크 연결은 이 목표를 위해 존재합니다."
@@ -2425,28 +2436,28 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
 
         // Hashed as Vibe Coding Organization
-        { type: "header", content: isKo ? "5-2. 자본가에서 슈퍼 커넥터로" : "5-2. FROM CAPITALIST TO SUPER CONNECTOR", bullet: true },
+        { type: "header", content: isKo ? "5-2. 자본가에서 신뢰+유통 라우터로" : "5-2. FROM CAPITALIST TO TRUST+DISTRIBUTION ROUTER", bullet: true },
         { type: "blank", content: "" },
         { type: "output", content: isKo
-          ? "자본이 풍부하고 개발 비용이 급격히 낮아진 세상에서, VC의 역할을 다시 생각하게 됩니다."
-          : "In a world of abundant capital and plummeting development costs, we're rethinking the role of VCs.", bullet: true },
+          ? "2026년 현재, MVP를 만드는데 1억 원도 과할 정도로 비용이 내려갔습니다. 1-2명이 AI로 제품을 만드는데 10억이 필요하지 않습니다."
+          : "In 2026, costs have dropped so much that even ₩100M is excessive for building an MVP. 1-2 people building with AI don't need ₩1B.", bullet: true },
         { type: "blank", content: "" },
         { type: "info", content: isKo
           ? "바이브 코딩 시대의 창업자에게 자본보다 더 희소한 것이 있다고 봅니다."
           : "We see something scarcer than capital for founders in the vibe coding era.", bullet: true },
         { type: "success", content: isKo
-          ? "바로 '신뢰'와 '연결'입니다."
-          : "That's 'trust' and 'connection'." },
+          ? "바로 '믿을 만한 신호(Signal)'와 '글로벌 연결'입니다."
+          : "That's 'trustworthy signal' and 'global connection'." },
         { type: "blank", content: "" },
         { type: "list-item", content: isKo
-          ? "신뢰의 숏컷(Shortcut to Trust) — 우리 포트폴리오라는 사실만으로 신뢰의 보증수표"
-          : "Shortcut to Trust — being our portfolio is a trust guarantee", bulletColor: "green" },
+          ? "노이즈 속의 시그널 — AI가 만든 제품들로 넘쳐나는 세상에서, 'Hashed 포트폴리오'라는 뱃지가 보증수표가 됩니다"
+          : "Signal in the noise — In a world flooded with AI-built products, the 'Hashed portfolio' badge becomes a trust guarantee", bulletColor: "green" },
         { type: "list-item", content: isKo
-          ? "글로벌 유통망 — 아부다비 국부펀드, 도쿄 IP 홀더, 실리콘밸리 빅테크와 즉시 연결"
-          : "Global Distribution — instant connection to Abu Dhabi sovereign funds, Tokyo IP holders, Silicon Valley big tech", bulletColor: "green" },
+          ? "글로벌 유통망 — 아부다비 국부펀드, 도쿄 IP 홀더, 실리콘밸리 빅테크와 즉시 연결. 소개를 '많이' 하는 게 아니라, 성공 확률이 올라가는 방향으로 '정렬'합니다"
+          : "Global distribution — instant connection to Abu Dhabi sovereign funds, Tokyo IP holders, Silicon Valley big tech. We don't just make 'many' intros, we 'align' them to increase success probability", bulletColor: "green" },
         { type: "list-item", content: isKo
-          ? "동료의 밀도 — 같은 속도로 달리는 최고 수준의 빌더 커뮤니티"
-          : "Density of Peers — top-tier builder community running at the same speed", bulletColor: "green" },
+          ? "동료의 밀도 — 솔로 빌더의 가장 큰 어려움은 기술이 아니라 외로움입니다. 같은 속도로 달리는 최고 수준의 빌더 커뮤니티"
+          : "Density of peers — Solo builders' biggest challenge isn't technical, it's loneliness. A top-tier builder community running at the same speed", bulletColor: "green" },
         { type: "blank", content: "" },
         { type: "dim", content: "─".repeat(50) },
         { type: "blank", content: "" },

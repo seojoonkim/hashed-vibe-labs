@@ -943,8 +943,8 @@ export default function TerminalApp() {
                       >
                         <span className="mr-2 flex-shrink-0 text-[#555]" style={{ fontSize: '0.45em', position: 'relative', top: '0.15em' }}>●</span>
                         <span>{isKo
-                          ? "국내외 최고 수준의 바이브 코딩 개발자들이 멘토로 참여"
-                          : "Mentored by world-class vibe coders"}</span>
+                          ? "국내외 최고 수준의 바이브 코딩 개발자들이 플레잉 코치로 참여"
+                          : "World-class vibe coders as playing coaches"}</span>
                       </motion.div>
                     )}
                   </div>
@@ -1800,7 +1800,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
           : "In 2026, three batches will run with local partners and investors." },
         { type: "blank", content: "" },
         // 배치 목록 (각각 독립 항목)
-        { type: "success", content: isKo ? "1st Batch · 서울 Edition · 2026년 3월 2일 시작" : "1st Batch · Seoul Edition · March 2, 2026", bullet: true },
+        { type: "success", content: isKo ? "1st Batch · 서울 Edition · 2026년 3월 3일 시작" : "1st Batch · Seoul Edition · March 3, 2026", bullet: true },
         { type: "info", content: isKo ? "2nd Batch · 싱가포르 Edition · 2026년 6월 (예정)" : "2nd Batch · Singapore Edition · June 2026 (TBD)", bullet: true },
         { type: "info", content: isKo ? "3rd Batch · 아부다비 Edition · 2026년 10월 (예정)" : "3rd Batch · Abu Dhabi Edition · October 2026 (TBD)", bullet: true },
         { type: "blank", content: "" },
@@ -1921,8 +1921,8 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "header", content: isKo ? "2-3. 평가 기준" : "2-3. EVALUATION CRITERIA", bullet: true },
         { type: "blank", content: "" },
         { type: "output", content: isKo
-          ? "기존 투자 심사 방식과 조금 다른 관점으로 팀을 보려고 합니다. 완성된 사업 계획서나 시장 분석도 의미가 있지만, 지금 이 순간 어떻게 움직이고 있는지에 더 관심이 갑니다."
-          : "We try to look at teams from a slightly different perspective than traditional investment. Completed business plans and market analysis have their place, but we're more drawn to how you're moving right now.", bullet: true },
+          ? "기존 투자 심사 방식과 조금 다른 관점으로 팀을 보려고 합니다. 완성된 사업 계획서나 시장 분석도 의미가 있지만, 지금 이 순간 어떻게 움직이고 있는지에 더 집중하려 합니다."
+          : "We try to look at teams from a slightly different perspective than traditional investment. Completed business plans and market analysis have their place, but we're more focused on how you're moving right now.", bullet: true },
         { type: "blank", content: "" },
         { type: "error", content: isKo ? "크게 보지 않는 것:" : "What we don't focus on:", bullet: true },
         { type: "list-item", content: isKo ? "아이디어의 크기나 참신함" : "Size or novelty of the idea", bulletColor: "orange" },
@@ -1980,7 +1980,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
 
         // Phase 1
         { type: "info", content: "Phase 1: Offline Entry Session", bullet: true },
-        { type: "dim", content: "Meetup · 2026.01.30" },
+        { type: "dim", content: "Meetup · 2026.01.30(금)" },
         { type: "blank", content: "" },
         { type: "list-item", content: isKo
           ? "본 프로그램 시작 전 잠재 지원자들이 모이는 네트워킹 밋업"
@@ -2069,7 +2069,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
           ? "피치덱이 아니라 대시보드로 이야기합니다. 50+ VC 앞에서 숫자로 피칭합니다."
           : "Pitch with dashboards, not decks. Present with numbers in front of 50+ VCs.", bulletColor: "yellow" },
         { type: "list-item", content: isKo
-          ? "8주간의 ARR 성장 그래프를 공개합니다"
+          ? "8주간의 ARR 성장 그래프를 공개"
           : "Reveal your 8-week ARR growth graph", bulletColor: "yellow" },
         { type: "list-item", content: isKo
           ? "Hashed LP 네트워크 내 50+ 유관 기업 중 사업 연계 가능한 파트너에 선별 연결"
@@ -2154,7 +2154,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
 
         // 1. Offline Entry Session
         { type: "success", content: "1. Offline Entry Session", bullet: true },
-        { type: "output", content: isKo ? "2026.01.30 (목)" : "Jan 30, 2026 (Thu)" },
+        { type: "output", content: isKo ? "2026.01.30(금)" : "Jan 30, 2026 (Fri)" },
         { type: "list-item", content: isKo
           ? "잠재 지원자들이 참여하는 오프라인 밋업"
           : "Offline meetup for potential applicants", bulletColor: "blue" },
@@ -2168,7 +2168,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
 
         // 2. Application
         { type: "success", content: "2. Application", bullet: true },
-        { type: "output", content: isKo ? "2026.02.01 – 02.19" : "Feb 1 – 19, 2026" },
+        { type: "output", content: isKo ? "2026.02.01(일) - 2026.02.19(목)" : "Feb 1 (Sun) – Feb 19 (Thu), 2026" },
         { type: "list-item", content: isKo
           ? "개인 또는 팀 단위 지원"
           : "Apply as individual or team", bulletColor: "blue" },
@@ -2185,7 +2185,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
 
         // 3. Finalist Announcement
         { type: "success", content: "3. Finalist Announcement", bullet: true },
-        { type: "output", content: isKo ? "2026.02.27 (목)" : "Feb 27, 2026 (Thu)" },
+        { type: "output", content: isKo ? "2026.02.27(금)" : "Feb 27, 2026 (Fri)" },
         { type: "list-item", content: isKo
           ? "본 프로그램에 참여할 3–5팀 발표"
           : "3-5 teams announced for main program", bulletColor: "yellow" },
@@ -2196,7 +2196,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
 
         // 4. Vibe Labs Seoul
         { type: "success", content: "4. Vibe Labs Seoul", bullet: true },
-        { type: "output", content: isKo ? "2026.03.02 – 04 (약 8주)" : "Mar 2 – Apr 2026 (~8 weeks)" },
+        { type: "output", content: isKo ? "2026.03.03(화) - 2026.04.24(금)" : "Mar 3 (Tue) – Apr 24 (Fri), 2026" },
         { type: "list-item", content: isKo
           ? "선발된 팀들과 함께하는 집중 빌딩 기간"
           : "Intensive building period with selected teams", bulletColor: "green" },
@@ -2561,8 +2561,8 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
         { type: "success", content: isKo ? "4) 바이브 코딩 멘토링" : "4) Vibe Coding Mentorship", bullet: true },
         { type: "list-item", content: isKo
-          ? "국내외 최고 수준의 바이브 코딩 개발자들이 멘토로 참여"
-          : "World-class vibe coders as mentors", bulletColor: "yellow" },
+          ? "국내외 최고 수준의 바이브 코딩 개발자들이 플레잉 코치로 참여"
+          : "World-class vibe coders as playing coaches", bulletColor: "yellow" },
         { type: "list-item", content: isKo
           ? "배치에 선발된 창업자들과의 학습 및 교류 세션"
           : "Learning and networking sessions with selected batch founders", bulletColor: "yellow" },

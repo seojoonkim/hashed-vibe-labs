@@ -1090,7 +1090,10 @@ export default function TerminalApp() {
                 </span>
               ) : (
                 <span className="text-[#888]">
-                  {isKo ? "명령어를 입력하세요... 다음 컨텐츠는 " : "Enter command... Next: "}{MENU_COMMANDS[selectedMenuIndex]?.command} {isKo ? MENU_COMMANDS[selectedMenuIndex]?.labelKo : MENU_COMMANDS[selectedMenuIndex]?.label}
+                  {isMobile
+                    ? (isKo ? "명령어를 입력하세요..." : "Enter command...")
+                    : (isKo ? "명령어를 입력하세요... 다음 컨텐츠는 " : "Enter command... Next: ") + MENU_COMMANDS[selectedMenuIndex]?.command + " " + (isKo ? MENU_COMMANDS[selectedMenuIndex]?.labelKo : MENU_COMMANDS[selectedMenuIndex]?.label)
+                  }
                 </span>
               )}
             </span>
@@ -1141,15 +1144,15 @@ export default function TerminalApp() {
                 {isMenuOpen && (
                   <motion.div
                       ref={menuRef}
-                      className="absolute bg-[#333] border border-[#555] rounded overflow-hidden shadow-2xl"
+                      className={`bg-[#333] border border-[#555] rounded overflow-hidden shadow-2xl ${isMobile ? 'fixed left-4 right-4' : 'absolute right-0'}`}
                       style={{
                         zIndex: 9999,
-                        right: isMobile ? "-16px" : "0",
-                        left: isMobile ? "-16px" : "auto",
-                        bottom: "100%",
-                        marginBottom: "36px",
+                        bottom: isMobile ? "auto" : "100%",
+                        top: isMobile ? "auto" : "auto",
+                        marginBottom: isMobile ? "0" : "36px",
                         minWidth: isMobile ? "auto" : "280px",
-                        maxWidth: isMobile ? "none" : "400px"
+                        maxWidth: isMobile ? "none" : "400px",
+                        ...(isMobile && { bottom: "80px" })
                       }}
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}

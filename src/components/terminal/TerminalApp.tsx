@@ -2218,8 +2218,8 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "header", content: isKo ? "4-2. 8주의 여정" : "4-2. THE 8-WEEK JOURNEY", bullet: true },
         { type: "blank", content: "" },
         { type: "output", content: isKo
-          ? "\"목표는 단 하나. 8주 안에 ARR을 만들거나, 수 배 이상 높이는 것.\""
-          : "\"One goal: Create ARR or multiply it several times in 8 weeks.\"", bullet: true },
+          ? "\"목표는 단 하나. 8주 안에 ARR을 의미있게 만들고, 그것을 수 배 이상 높이는 것.\""
+          : "\"One goal: Build meaningful ARR in 8 weeks, then multiply it several times over.\"", bullet: true },
         { type: "blank", content: "" },
 
         // ARR 설명

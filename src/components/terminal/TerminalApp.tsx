@@ -1795,7 +1795,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         // 배치 목록 (각각 독립 항목)
         { type: "success", content: isKo ? "1st Batch · 서울 Edition · 2026년 3월 2일 시작" : "1st Batch · Seoul Edition · March 2, 2026", bullet: true },
         { type: "info", content: isKo ? "2nd Batch · 싱가포르 Edition · 2026년 6월 (예정)" : "2nd Batch · Singapore Edition · June 2026 (TBD)", bullet: true },
-        { type: "info", content: isKo ? "3rd Batch · 아부다비 Edition · 2026년 9월 (예정)" : "3rd Batch · Abu Dhabi Edition · September 2026 (TBD)", bullet: true },
+        { type: "info", content: isKo ? "3rd Batch · 아부다비 Edition · 2026년 10월 (예정)" : "3rd Batch · Abu Dhabi Edition · October 2026 (TBD)", bullet: true },
         { type: "blank", content: "" },
         { type: "dim", content: "─".repeat(50) },
         { type: "blank", content: "" },

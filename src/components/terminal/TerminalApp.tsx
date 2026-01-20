@@ -1789,6 +1789,29 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "info", content: isKo ? "2nd Batch · 싱가포르 Edition · 2026년 6월 (예정)" : "2nd Batch · Singapore Edition · June 2026 (TBD)", bullet: true },
         { type: "info", content: isKo ? "3rd Batch · 아부다비 Edition · 2026년 9월 (예정)" : "3rd Batch · Abu Dhabi Edition · September 2026 (TBD)", bullet: true },
         { type: "blank", content: "" },
+        { type: "dim", content: "─".repeat(50) },
+        { type: "blank", content: "" },
+
+        // Contributors 섹션
+        { type: "header", content: isKo ? "1-4. 컨트리뷰터" : "1-4. CONTRIBUTORS", bullet: true },
+        { type: "blank", content: "" },
+        { type: "output", content: isKo
+          ? "Vibe Labs는 다양한 분야의 전문가들이 함께 만들어갑니다."
+          : "Vibe Labs is built with experts from diverse fields.", bullet: true },
+        { type: "blank", content: "" },
+        { type: "list-item", content: isKo
+          ? "Meta, Kakao 출신 데이터 사이언티스트"
+          : "Former data scientist at Meta and Kakao", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "이더리움 재단 전 기술 이사"
+          : "Former technical director of Ethereum Foundation", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "글로벌 크립토 데이터 분석 플랫폼 창업자"
+          : "Founder of leading crypto data analytics platform", bulletColor: "green" },
+        { type: "list-item", content: isKo
+          ? "국내 대표 소셜 레저 플랫폼 전 창업자"
+          : "Former founder of leading social leisure platform in Korea", bulletColor: "green" },
+        { type: "blank", content: "" },
         { type: "blink", content: isKo ? "Enter를 눌러 계속하세요..." : "Press Enter to continue..." },
         { type: "blank", content: "" },
       );

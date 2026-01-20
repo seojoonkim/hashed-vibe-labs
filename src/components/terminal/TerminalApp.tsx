@@ -331,6 +331,7 @@ export default function TerminalApp() {
 
   // Reset terminal to initial state
   const resetTerminal = useCallback(() => {
+    setIsMenuOpen(false);
     setLines([]);
     setShowHero(true);
     setHeroStep(0);
@@ -409,6 +410,7 @@ export default function TerminalApp() {
     const animate = () => {
       if (step <= 3) { // Only animate up to step 3 (> [0] /home)
         setHeroStep(step);
+        scrollToBottom();
         step++;
         setTimeout(animate, HERO_STEP_DELAY);
       } else {
@@ -418,7 +420,7 @@ export default function TerminalApp() {
     };
 
     setTimeout(animate, HERO_STEP_DELAY);
-  }, [showHero, heroStep]);
+  }, [showHero, heroStep, scrollToBottom]);
 
   // Hero loading animation (after > [0] /home is shown)
   useEffect(() => {
@@ -1169,7 +1171,11 @@ export default function TerminalApp() {
                               ? 'bg-[#e07a5f] text-white'
                               : 'hover:bg-[#444]'
                           }`}
-                          onClick={() => handleCommand(cmd.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setIsMenuOpen(false);
+                            handleCommand(cmd.id);
+                          }}
                           onMouseEnter={() => setSelectedMenuIndex(index)}
                           initial={{ opacity: 0, x: -10 }}
                           animate={{ opacity: 1, x: 0 }}

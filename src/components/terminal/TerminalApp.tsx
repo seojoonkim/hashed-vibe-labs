@@ -1144,15 +1144,13 @@ export default function TerminalApp() {
                 {isMenuOpen && (
                   <motion.div
                       ref={menuRef}
-                      className={`bg-[#333] border border-[#555] rounded overflow-hidden shadow-2xl ${isMobile ? 'fixed left-4 right-4' : 'absolute right-0'}`}
+                      className={`bg-[#333] border border-[#555] rounded overflow-hidden shadow-2xl ${isMobile ? 'fixed right-4' : 'absolute right-0'}`}
                       style={{
                         zIndex: 9999,
-                        bottom: isMobile ? "auto" : "100%",
-                        top: isMobile ? "auto" : "auto",
+                        bottom: isMobile ? "80px" : "100%",
                         marginBottom: isMobile ? "0" : "36px",
-                        minWidth: isMobile ? "auto" : "280px",
-                        maxWidth: isMobile ? "none" : "400px",
-                        ...(isMobile && { bottom: "80px" })
+                        minWidth: "280px",
+                        maxWidth: "400px"
                       }}
                       initial={{ opacity: 0, y: 10, scale: 0.95 }}
                       animate={{ opacity: 1, y: 0, scale: 1 }}

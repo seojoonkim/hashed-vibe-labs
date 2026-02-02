@@ -1107,7 +1107,15 @@ export default function TerminalApp() {
             />
           ) : (
           <div className="flex items-center">
-            <span className="text-[#666] mr-2">{">"}</span>
+            {/* Clickable prompt symbol - always opens menu */}
+            <span 
+              className="text-[#666] mr-2 cursor-pointer hover:text-[#888] transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                openMenu();
+              }}
+              title={isKo ? "메뉴 열기 (⌘)" : "Open menu (⌘)"}
+            >{">"}</span>
             {/* Apply section: show actual input field for /submit */}
             {currentSectionIndex === 5 ? (
               <>

@@ -36,7 +36,7 @@ export default function ApplyForm({ language, onComplete, onCancel }: ApplyFormP
             <li>• {isKo ? "데모 영상 또는 스크린샷" : "Demo video or screenshots"}</li>
             <li>• GitHub/GitLab repo</li>
             <li>• {isKo ? "현재 트랙션 (유저 수, ARR 등)" : "Current traction (users, ARR, etc.)"}</li>
-            <li>• {isKo ? "그 외 팀과 프로젝트에 대해서 하고 싶은 어떠한 컨텐츠나 포맷도 가능" : "Any other content or format about your team and project"}</li>
+            <li>• {isKo ? "그 외 팀과 프로젝트에 대해서 소개하고 싶은 어떠한 컨텐츠나 포맷도 가능" : "Any other content or format to introduce your team and project"}</li>
           </ul>
         </div>
         

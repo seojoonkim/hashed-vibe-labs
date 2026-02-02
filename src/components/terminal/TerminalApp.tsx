@@ -1089,8 +1089,8 @@ export default function TerminalApp() {
       {/* Input prompt - fixed at bottom */}
       <div
         ref={inputRef}
-        className={`flex-shrink-0 bg-[#1a1a1a] ${!isApplyMode && !isCheckMode && currentSectionIndex !== 5 ? 'cursor-pointer' : ''} group rounded-b-lg relative`}
-        onClick={() => !isApplyMode && !isCheckMode && currentSectionIndex !== 5 && openMenu()}
+        className={`flex-shrink-0 bg-[#1a1a1a] ${!isApplyMode && !isCheckMode ? 'cursor-pointer' : ''} group rounded-b-lg relative`}
+        onClick={() => !isApplyMode && !isCheckMode && openMenu()}
       >
         <div className={`${isMobile ? 'px-4' : 'max-w-[900px] mx-auto w-full px-6'} py-2`}>
           {/* Apply Mode - AskUserQuestion style inline */}
@@ -1116,51 +1116,26 @@ export default function TerminalApp() {
               }}
               title={isKo ? "메뉴 열기 (⌘)" : "Open menu (⌘)"}
             >{">"}</span>
-            {/* Apply section: show actual input field for /submit */}
-            {currentSectionIndex === 5 ? (
-              <>
-                <input
-                  ref={commandInputRef}
-                  type="text"
-                  value={commandInput}
-                  onChange={(e) => setCommandInput(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      const cmd = commandInput.trim().toLowerCase();
-                      if (cmd === "/submit" || cmd === "submit") {
-                        setIsApplyMode(true);
-                        setCommandInput("");
-                      }
-                    }
-                  }}
-                  placeholder={isKo ? "/submit 입력하여 지원서 작성..." : "Type /submit to start application..."}
-                  className="flex-1 bg-transparent border-none outline-none text-[#d8d8d8] placeholder-[#666] caret-[#e07a5f]"
-                  autoFocus
-                />
-              </>
-            ) : (
-              <>
-                <motion.span
-                  className="inline-block w-[2px] h-4 bg-[#e07a5f] mr-[1px]"
-                  animate={{ opacity: [1, 1, 0, 0] }}
-                  transition={{ duration: 1.0, repeat: Infinity, times: [0, 0.5, 0.5, 1] }}
-                />
-                <span className="text-[#888] group-hover:text-[#aaa] transition-colors flex-1">
-                  {isTyping ? (
-                    <span className="text-[#fbbf24]">
-                      {isKo ? "처리 중..." : "Processing..."}
-                    </span>
-                  ) : (
-                    <span className="text-[#888]">
-                      {isMobile
-                        ? (isKo ? "명령어를 입력하세요..." : "Enter command...")
-                        : (isKo ? "명령어를 입력하세요... 다음 컨텐츠는 " : "Enter command... Next: ") + MENU_COMMANDS[selectedMenuIndex]?.command + " " + (isKo ? MENU_COMMANDS[selectedMenuIndex]?.labelKo : MENU_COMMANDS[selectedMenuIndex]?.label)
-                      }
-                    </span>
-                  )}
+            {/* Cursor and prompt text - same for all sections */}
+            <motion.span
+              className="inline-block w-[2px] h-4 bg-[#e07a5f] mr-[1px]"
+              animate={{ opacity: [1, 1, 0, 0] }}
+              transition={{ duration: 1.0, repeat: Infinity, times: [0, 0.5, 0.5, 1] }}
+            />
+            <span className="text-[#888] group-hover:text-[#aaa] transition-colors flex-1">
+              {isTyping ? (
+                <span className="text-[#fbbf24]">
+                  {isKo ? "처리 중..." : "Processing..."}
                 </span>
-              </>
-            )}
+              ) : (
+                <span className="text-[#888]">
+                  {isMobile
+                    ? (isKo ? "명령어를 입력하세요..." : "Enter command...")
+                    : (isKo ? "명령어를 입력하세요... 다음 컨텐츠는 " : "Enter command... Next: ") + MENU_COMMANDS[selectedMenuIndex]?.command + " " + (isKo ? MENU_COMMANDS[selectedMenuIndex]?.labelKo : MENU_COMMANDS[selectedMenuIndex]?.label)
+                  }
+                </span>
+              )}
+            </span>
             {/* Claude-style execute button with menu */}
             <div className="relative ml-3 flex-shrink-0">
               <button

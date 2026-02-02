@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { useI18n } from "@/lib/i18n";
 import { PROGRAM_DATA } from "@/lib/constants";
+import ApplyForm from "./ApplyForm";
+import CheckSubmission from "./CheckSubmission";
 
 // Animation timing constants (all in ms)
 const ANIMATION_SPEED = 118; // Base speed for text lines
@@ -96,7 +98,7 @@ const MENU_COMMANDS: MenuCommand[] = [
   { id: "timeline", command: "[4] /timeline", label: "Timeline", labelKo: "일정" },
   { id: "hashed", command: "[5] /hashed", label: "About Hashed", labelKo: "Hashed 소개" },
   { id: "apply", command: "[6] /apply", label: "Apply Now", labelKo: "지원하기" },
-  { id: "lang", command: "[9] /lang", label: "한국어로 변경", labelKo: "Switch to English" },
+  { id: "lang", command: "[7] /lang", label: "한국어로 변경", labelKo: "Switch to English" },
 ];
 
 // Big block ASCII art for HASHED (Claude Code style - filled blocks with outlines)
@@ -232,7 +234,11 @@ export default function TerminalApp() {
   const [loadingState, setLoadingState] = useState<{ isLoading: boolean; sectionId: string; messageIndex: number } | null>(null);
   const [isThinking, setIsThinking] = useState(false); // "Thinking..." indicator before loading
   const [heroLoadingStep, setHeroLoadingStep] = useState(0); // 0: not started, 1: thinking, 2: loading messages, 3: done
+  const [commandInput, setCommandInput] = useState(""); // For /submit command input in apply section
+  const [isApplyMode, setIsApplyMode] = useState(false); // Apply form mode
+  const [isCheckMode, setIsCheckMode] = useState(false); // Check submission mode
   const terminalBodyRef = useRef<HTMLDivElement>(null);
+  const commandInputRef = useRef<HTMLInputElement>(null);
   const inputRef = useRef<HTMLDivElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const lineIdRef = useRef(0);
@@ -580,6 +586,12 @@ export default function TerminalApp() {
       return;
     }
 
+    // Handle check submission - show check mode directly
+    if (commandId === "check") {
+      setIsCheckMode(true);
+      return;
+    }
+
     // Update current section index
     const sectionIndex = SECTION_ORDER.indexOf(commandId);
     if (sectionIndex !== -1) {
@@ -635,6 +647,9 @@ export default function TerminalApp() {
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
+
+      // Ignore all keyboard events when in apply mode
+      if (isApplyMode || isCheckMode) return;
 
       // Menu navigation when open
       if (isMenuOpen) {
@@ -700,7 +715,7 @@ export default function TerminalApp() {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isMenuOpen, language, setLanguage, selectedMenuIndex, currentSectionIndex]);
+  }, [isMenuOpen, language, setLanguage, selectedMenuIndex, currentSectionIndex, isApplyMode, isCheckMode]);
 
   // Format countdown
   const countdownStr = countdown.total > 0
@@ -1074,31 +1089,70 @@ export default function TerminalApp() {
       {/* Input prompt - fixed at bottom */}
       <div
         ref={inputRef}
-        className="flex-shrink-0 bg-[#1a1a1a] cursor-pointer group rounded-b-lg relative"
-        onClick={() => openMenu()}
+        className={`flex-shrink-0 bg-[#1a1a1a] ${!isApplyMode && !isCheckMode && currentSectionIndex !== 5 ? 'cursor-pointer' : ''} group rounded-b-lg relative`}
+        onClick={() => !isApplyMode && !isCheckMode && currentSectionIndex !== 5 && openMenu()}
       >
         <div className={`${isMobile ? 'px-4' : 'max-w-[900px] mx-auto w-full px-6'} py-2`}>
+          {/* Apply Mode - AskUserQuestion style inline */}
+          {isApplyMode ? (
+            <ApplyForm
+              language={language}
+              onComplete={() => setIsApplyMode(false)}
+              onCancel={() => setIsApplyMode(false)}
+            />
+          ) : isCheckMode ? (
+            <CheckSubmission
+              onComplete={() => setIsCheckMode(false)}
+              onCancel={() => setIsCheckMode(false)}
+            />
+          ) : (
           <div className="flex items-center">
             <span className="text-[#666] mr-2">{">"}</span>
-            <motion.span
-              className="inline-block w-[2px] h-4 bg-[#e07a5f] mr-[1px]"
-              animate={{ opacity: [1, 1, 0, 0] }}
-              transition={{ duration: 1.0, repeat: Infinity, times: [0, 0.5, 0.5, 1] }}
-            />
-            <span className="text-[#888] group-hover:text-[#aaa] transition-colors flex-1">
-              {isTyping ? (
-                <span className="text-[#fbbf24]">
-                  {isKo ? "처리 중..." : "Processing..."}
+            {/* Apply section: show actual input field for /submit */}
+            {currentSectionIndex === 5 ? (
+              <>
+                <input
+                  ref={commandInputRef}
+                  type="text"
+                  value={commandInput}
+                  onChange={(e) => setCommandInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      const cmd = commandInput.trim().toLowerCase();
+                      if (cmd === "/submit" || cmd === "submit") {
+                        setIsApplyMode(true);
+                        setCommandInput("");
+                      }
+                    }
+                  }}
+                  placeholder={isKo ? "/submit 입력하여 지원서 작성..." : "Type /submit to start application..."}
+                  className="flex-1 bg-transparent border-none outline-none text-[#d8d8d8] placeholder-[#666] caret-[#e07a5f]"
+                  autoFocus
+                />
+              </>
+            ) : (
+              <>
+                <motion.span
+                  className="inline-block w-[2px] h-4 bg-[#e07a5f] mr-[1px]"
+                  animate={{ opacity: [1, 1, 0, 0] }}
+                  transition={{ duration: 1.0, repeat: Infinity, times: [0, 0.5, 0.5, 1] }}
+                />
+                <span className="text-[#888] group-hover:text-[#aaa] transition-colors flex-1">
+                  {isTyping ? (
+                    <span className="text-[#fbbf24]">
+                      {isKo ? "처리 중..." : "Processing..."}
+                    </span>
+                  ) : (
+                    <span className="text-[#888]">
+                      {isMobile
+                        ? (isKo ? "명령어를 입력하세요..." : "Enter command...")
+                        : (isKo ? "명령어를 입력하세요... 다음 컨텐츠는 " : "Enter command... Next: ") + MENU_COMMANDS[selectedMenuIndex]?.command + " " + (isKo ? MENU_COMMANDS[selectedMenuIndex]?.labelKo : MENU_COMMANDS[selectedMenuIndex]?.label)
+                      }
+                    </span>
+                  )}
                 </span>
-              ) : (
-                <span className="text-[#888]">
-                  {isMobile
-                    ? (isKo ? "명령어를 입력하세요..." : "Enter command...")
-                    : (isKo ? "명령어를 입력하세요... 다음 컨텐츠는 " : "Enter command... Next: ") + MENU_COMMANDS[selectedMenuIndex]?.command + " " + (isKo ? MENU_COMMANDS[selectedMenuIndex]?.labelKo : MENU_COMMANDS[selectedMenuIndex]?.label)
-                  }
-                </span>
-              )}
-            </span>
+              </>
+            )}
             {/* Claude-style execute button with menu */}
             <div className="relative ml-3 flex-shrink-0">
               <button
@@ -1192,6 +1246,7 @@ export default function TerminalApp() {
               </AnimatePresence>
             </div>
           </div>
+          )}
         </div>
       </div>
       </motion.div>
@@ -2651,28 +2706,35 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         // How to Apply
         { type: "header", content: isKo ? "6-2. 지원 방법" : "6-2. HOW TO APPLY", bullet: true },
         { type: "blank", content: "" },
-        { type: "status-info", content: isKo ? "지원 대상: 개인 또는 3인 이하 팀" : "Who: Individuals or teams of 3 or less", bullet: true },
+        { type: "status-info", content: isKo
+          ? "vibelabs@hashed.com 으로 아래 내용을 포함해 메일을 보내주세요."
+          : "Send an email to vibelabs@hashed.com with the following:", bullet: true },
         { type: "blank", content: "" },
-        { type: "output", content: isKo ? "제출물:" : "Submit:", bullet: true },
+        { type: "output", content: isKo ? "필수:" : "Required:", bullet: true },
         { type: "list-item", content: isKo
-          ? "현재 만들고 있는 것 (URL, demo, repo 등)"
-          : "What you're building (URL, demo, repo, etc.)" },
+          ? "팀 소개 (인원, 풀타임 여부, 소셜 링크)"
+          : "Team intro (size, full-time status, social links)" },
         { type: "list-item", content: isKo
-          ? "간단한 배경 설명"
-          : "Brief background description" },
+          ? "라이브 서비스 URL"
+          : "Live service URL" },
+        { type: "blank", content: "" },
+        { type: "output", content: isKo ? "선택 (있으면 좋음):" : "Optional (nice to have):", bullet: true },
+        { type: "list-item", content: isKo
+          ? "데모 영상 또는 스크린샷"
+          : "Demo video or screenshots" },
+        { type: "list-item", content: isKo
+          ? "GitHub/GitLab repo"
+          : "GitHub/GitLab repo" },
+        { type: "list-item", content: isKo
+          ? "현재 트랙션 (유저 수, ARR 등)"
+          : "Current traction (users, ARR, etc.)" },
+        { type: "blank", content: "" },
+        { type: "dim", content: isKo ? "※ 형식은 자유입니다." : "※ Format is flexible.", bullet: true },
         { type: "blank", content: "" },
         { type: "error", content: isKo
           ? "⚠ 지원 마감: 2026년 2월 19일 (목) 23:59:59 KST"
           : "⚠ Deadline: Feb 19, 2026 (Thu) 23:59:59 KST", bullet: true },
         { type: "countdown", content: isKo ? "마감" : "deadline" },
-        { type: "blank", content: "" },
-        { type: "dim", content: "─".repeat(50) },
-        { type: "blank", content: "" },
-        { type: "success", content: isKo
-          ? "→ 지원하기: 2월 1일에 오픈합니다"
-          : "→ Apply: Opens February 1st", bullet: true },
-        { type: "blank", content: "" },
-        { type: "blink", content: isKo ? "Enter를 눌러 계속하세요..." : "Press Enter to continue..." },
         { type: "blank", content: "" },
       );
       break;

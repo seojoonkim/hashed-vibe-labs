@@ -96,9 +96,11 @@ const MENU_COMMANDS: MenuCommand[] = [
   { id: "who", command: "[2] /who", label: "Who Should Apply", labelKo: "지원 대상" },
   { id: "program", command: "[3] /program", label: "Program Structure", labelKo: "프로그램 구조" },
   { id: "timeline", command: "[4] /timeline", label: "Timeline", labelKo: "일정" },
-  { id: "hashed", command: "[5] /hashed", label: "About Hashed", labelKo: "Hashed 소개" },
-  { id: "apply", command: "[6] /apply", label: "Apply Now", labelKo: "지원하기" },
-  { id: "lang", command: "[7] /lang", label: "한국어로 변경", labelKo: "Switch to English" },
+  { id: "fellows", command: "[5] /fellows", label: "Fellows", labelKo: "펠로우" },
+  { id: "faq", command: "[6] /faq", label: "FAQ", labelKo: "자주 묻는 질문" },
+  { id: "hashed", command: "[7] /hashed", label: "About Hashed", labelKo: "Hashed 소개" },
+  { id: "apply", command: "[8] /apply", label: "Apply Now", labelKo: "지원하기" },
+  { id: "lang", command: "[9] /lang", label: "한국어로 변경", labelKo: "Switch to English" },
 ];
 
 // Big block ASCII art for HASHED (Claude Code style - filled blocks with outlines)
@@ -180,8 +182,26 @@ const APPLY_ASCII = [
   "╚═╝  ╚═╝╚═╝     ╚═╝     ╚══════╝╚═╝   ",
 ];
 
+const FELLOWS_ASCII = [
+  "███████╗███████╗██╗     ██╗      ██████╗ ██╗    ██╗███████╗",
+  "██╔════╝██╔════╝██║     ██║     ██╔═══██╗██║    ██║██╔════╝",
+  "█████╗  █████╗  ██║     ██║     ██║   ██║██║ █╗ ██║███████╗",
+  "██╔══╝  ██╔══╝  ██║     ██║     ██║   ██║██║███╗██║╚════██║",
+  "██║     ███████╗███████╗███████╗╚██████╔╝╚███╔███╔╝███████║",
+  "╚═╝     ╚══════╝╚══════╝╚══════╝ ╚═════╝  ╚══╝╚══╝ ╚══════╝",
+];
+
+const FAQ_ASCII = [
+  "███████╗ █████╗  ██████╗ ",
+  "██╔════╝██╔══██╗██╔═══██╗",
+  "█████╗  ███████║██║   ██║",
+  "██╔══╝  ██╔══██║██║▄▄ ██║",
+  "██║     ██║  ██║╚██████╔╝",
+  "╚═╝     ╚═╝  ╚═╝ ╚══▀▀═╝ ",
+];
+
 // Section flow order
-const SECTION_ORDER = ["about", "who", "program", "timeline", "hashed", "apply"];
+const SECTION_ORDER = ["about", "who", "program", "timeline", "fellows", "faq", "hashed", "apply"];
 
 // Loading spinner frames (braille pattern)
 const SPINNER_FRAMES = ["⠋", "⠙", "⠹", "⠸", "⠼", "⠴", "⠦", "⠧", "⠇", "⠏"];
@@ -211,6 +231,14 @@ const LOADING_MESSAGES: Record<string, { ko: string[]; en: string[] }> = {
   hashed: {
     ko: ["Hashed 포트폴리오 로딩 중...", "네트워크 데이터 수집 중...", "완료!"],
     en: ["Loading Hashed portfolio...", "Gathering network data...", "Done!"],
+  },
+  fellows: {
+    ko: ["펠로우 명단 로딩 중...", "프로필 데이터 수집 중...", "완료!"],
+    en: ["Loading fellows list...", "Gathering profile data...", "Done!"],
+  },
+  faq: {
+    ko: ["FAQ 로딩 중...", "자주 묻는 질문 정리 중...", "완료!"],
+    en: ["Loading FAQ...", "Organizing common questions...", "Done!"],
   },
   apply: {
     ko: ["지원서 양식 준비 중...", "투자 조건 확인 중...", "완료!"],
@@ -2426,6 +2454,311 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
       );
       break;
 
+    case "fellows":
+      // Terminal prompt style command
+      lines.push({ type: "prompt", content: "cat fellows.md" });
+      lines.push({ type: "blank", content: "" });
+      // ASCII art header
+      FELLOWS_ASCII.forEach(line => {
+        lines.push({ type: "ascii", content: line });
+      });
+      lines.push(
+        { type: "blank", content: "" },
+        { type: "header", content: isKo ? "SEOUL EDITION 펠로우" : "SEOUL EDITION FELLOWS", bullet: true },
+        { type: "blank", content: "" },
+        { type: "output", content: isKo
+          ? "세계적인 오픈소스 프로젝트 개발자, 칸 광고제 수상 크리에이터, 대통령직속 AI위원회 위원, 세계 3대 해커, Kaggle Grandmaster, 그리고 차세대 고등학생 개발자까지."
+          : "From world-class open-source developers, Cannes Lions winners, Presidential AI Committee members, to world's top 3 hackers, Kaggle Grandmasters, and next-gen high school developers.", bullet: true },
+        { type: "blank", content: "" },
+        { type: "info", content: isKo
+          ? "분야도 나이도 배경도 모두 다르지만 공통점이 있습니다 — 직접 최전선에서 가장 빠르게 빌딩하는 사람들."
+          : "Diverse in fields, ages, and backgrounds, but one thing in common — those who build fastest at the frontlines.", bullet: true },
+        { type: "blank", content: "" },
+        { type: "dim", content: "─".repeat(50) },
+        { type: "blank", content: "" },
+
+        // 김민수
+        { type: "success", content: isKo
+          ? "김민수 · 컨텍스츠아이오 대표"
+          : "Minsoo Kim · CEO, Contexts.io", bullet: true },
+        { type: "output", content: isKo
+          ? "전 Meta, Ground X 엔지니어. NFTBank 운영하며 Hashed, Sequoia, DCG, 1kx 투자 유치. NFT 시장의 '블룸버그 터미널'을 목표로 온체인 자산 공정가치 알고리즘 개발 중."
+          : "Former Meta, Ground X engineer. Runs NFTBank, raised from Hashed, Sequoia, DCG, 1kx. Building the 'Bloomberg Terminal' for NFTs." },
+        { type: "blank", content: "" },
+
+        // 김서준
+        { type: "success", content: isKo
+          ? "김서준 · Hashed 대표"
+          : "Simon Kim · CEO, Hashed", bullet: true },
+        { type: "output", content: isKo
+          ? "2회 엑싯 연쇄 창업자이자 투자자. Web3 생태계 투자와 동시에 ETHval, Agenlinter, Promptguard 등 Web3/AI 프로젝트 직접 개발 중."
+          : "Serial founder with 2 exits. Investor and builder, actively investing in Web3 while developing ETHval, Agenlinter, Promptguard." },
+        { type: "blank", content: "" },
+
+        // 김연규
+        { type: "success", content: isKo
+          ? "김연규 · 오픈소스 개발자"
+          : "Yeongyu Kim · Open Source Developer", bullet: true },
+        { type: "output", content: isKo
+          ? "oh-my-opencode 창시자. GitHub 스타 3만, 다운로드 60만 회. 글로벌 코딩 에이전트 커뮤니티를 운영하며 AI 코딩 도구의 민주화를 이끄는 중."
+          : "Creator of oh-my-opencode. 30K GitHub stars, 600K downloads. Leading democratization of AI coding tools through global community." },
+        { type: "blank", content: "" },
+
+        // 김호진
+        { type: "success", content: isKo
+          ? "김호진 · Hashed Open Finance 대표"
+          : "Hojin Kim · CEO, Hashed Open Finance", bullet: true },
+        { type: "output", content: isKo
+          ? "ShardLab 대표. DeFi와 전통 금융의 접점에서 새로운 인프라 구축 중. 온체인 금융 서비스의 대중화를 목표로 다양한 프로토콜과 협업."
+          : "CEO of ShardLab. Building infrastructure at DeFi-TradFi intersection, collaborating with protocols to democratize on-chain finance." },
+        { type: "blank", content: "" },
+
+        // 민웅기
+        { type: "success", content: isKo
+          ? "민웅기 · FriendliAI 소프트웨어 엔지니어"
+          : "Woongki Min · Software Engineer, FriendliAI", bullet: true },
+        { type: "output", content: isKo
+          ? "Vercel AI SDK, vLLM 등 글로벌 오픈소스 프로젝트 핵심 기여자. LLM 추론 효율성과 서빙 최적화 분야에서 실질적 코드 기여로 인정받는 엔지니어."
+          : "Core contributor to Vercel AI SDK, vLLM. Recognized for practical contributions to LLM inference efficiency and serving optimization." },
+        { type: "blank", content: "" },
+
+        // 신기헌
+        { type: "success", content: isKo
+          ? "신기헌 · 크리에이티브 디렉터"
+          : "Kiheon Shin · Creative Director", bullet: true },
+        { type: "output", content: isKo
+          ? "19년차 베테랑. 칸 국제광고제 수상 경력. 브랜딩과 커뮤니케이션 전략 노하우를 AI 시대의 새로운 표현 방식에 접목 중."
+          : "19-year veteran, Cannes Lions winner. Applying branding and communication expertise to new forms of expression in the AI era." },
+        { type: "blank", content: "" },
+
+        // 안수빈
+        { type: "success", content: isKo
+          ? "안수빈 · Hashed Tech Lead"
+          : "Subin An · Tech Lead, Hashed", bullet: true },
+        { type: "output", content: isKo
+          ? "Kaggle Grandmaster이자 온체인 데이터 분석 플랫폼 Dune 글로벌 1위. 복잡한 블록체인 데이터를 인사이트로 전환하는 전문가이자 AI 개발자."
+          : "Kaggle Grandmaster, #1 global on Dune. Expert at transforming complex blockchain data into insights, and an AI developer." },
+        { type: "blank", content: "" },
+
+        // 여준호
+        { type: "success", content: isKo
+          ? "여준호 · 스트로크컴패니 창업자"
+          : "Junho Yeo · Founder, Stroke Company", bullet: true },
+        { type: "output", content: isKo
+          ? "GitHub 스타 5,000+. 반복적이고 고된 작업을 자동화하는 도구들을 만드는 Sisyphus Labs 운영. 개발자 생산성 향상에 집중."
+          : "5,000+ GitHub stars. Runs Sisyphus Labs, building tools to automate repetitive tasks. Focused on developer productivity." },
+        { type: "blank", content: "" },
+
+        // 이용준
+        { type: "success", content: isKo
+          ? "이용준 · 팩토마인드 공동창업자"
+          : "Yongjun Lee · Co-founder, Factomind", bullet: true },
+        { type: "output", content: isKo
+          ? "전 시티그룹 채권 트레이더. 월가 경험 기반 AI 투자 인사이트 플랫폼 팩토마인드 창업. 저서 '인사이더 인사이트' 저자."
+          : "Former Citigroup bond trader. Founded AI investment platform Factomind. Author of 'Insider Insight'." },
+        { type: "blank", content: "" },
+
+        // 이재홍
+        { type: "success", content: isKo
+          ? "이재홍 · Across Inc. 창업자"
+          : "Jaehong Lee · Founder, Across Inc.", bullet: true },
+        { type: "output", content: isKo
+          ? "LLM 검색결과 최적화 GEO/AEO(Generative Engine Optimization) 스타트업 대표. AI 시대의 새로운 SEO를 정의하며 브랜드 AI 노출 방식을 혁신 중."
+          : "CEO of GEO/AEO startup optimizing LLM search results. Defining new SEO for AI era, revolutionizing brand exposure in AI answers." },
+        { type: "blank", content: "" },
+
+        // 임완섭
+        { type: "success", content: isKo
+          ? "임완섭 · Loqu 창업자"
+          : "Wansub Lim · Founder, Loqu", bullet: true },
+        { type: "output", content: isKo
+          ? "전 이더리움재단 응용암호학팀 리드. ZKP 기반 1세대 롤업 개발 핵심 연구자. 프라이버시 보존 기술 상용화 추진 중."
+          : "Former Ethereum Foundation Applied Cryptography Lead. Core researcher of 1st-gen ZKP rollups. Commercializing privacy tech." },
+        { type: "blank", content: "" },
+
+        // 정성영
+        { type: "success", content: isKo
+          ? "정성영 · MarketFit Lab 창업자"
+          : "Sungyoung Jung · Founder, MarketFit Lab", bullet: true },
+        { type: "output", content: isKo
+          ? "전 삼성전자 C랩, 카카오벤처스 컨설턴트. 국내 최대 규모 그로스 해킹 전문가 그룹 운영. 수많은 스타트업의 성장 전략을 설계."
+          : "Former Samsung C-Lab, Kakao Ventures consultant. Runs Korea's largest growth hacking group. Designed strategies for numerous startups." },
+        { type: "blank", content: "" },
+
+        // 주기영
+        { type: "success", content: isKo
+          ? "주기영 · CryptoQuant 창업자"
+          : "Ki Young Ju · Founder, CryptoQuant", bullet: true },
+        { type: "output", content: isKo
+          ? "트위터 팔로워 42만+의 온체인 데이터 분석 글로벌 리더. 전 세계 크립토 트레이더들이 참조. unbias.fyi 공동창업."
+          : "Global on-chain analytics leader with 420K+ Twitter followers. Referenced by crypto traders worldwide. Co-founded unbias.fyi." },
+        { type: "blank", content: "" },
+
+        // Sigrid Jin
+        { type: "success", content: isKo
+          ? "Sigrid Jin · Sionic AI 엔지니어"
+          : "Sigrid Jin · Engineer, Sionic AI", bullet: true },
+        { type: "output", content: isKo
+          ? "AI 엔지니어링 커뮤니티 Instruct.KR 운영. viberank.app 기준 Claude Code 토큰 사용량 전 세계 1위. 한국 AI 개발자 생태계를 키우는 중."
+          : "Runs Instruct.KR community. #1 global Claude Code token usage per viberank.app. Growing Korea's AI developer ecosystem." },
+        { type: "blank", content: "" },
+
+        // 하용호
+        { type: "success", content: isKo
+          ? "하용호 · 데이터오븐 대표"
+          : "Yongho Ha · CEO, DataOven", bullet: true },
+        { type: "output", content: isKo
+          ? "ML 스타트업 2회 엑싯. 대통령직속 AI전략위원회 소속으로 국가 AI 정책 수립 참여. 데이터와 AI의 실질적 활용에 기여."
+          : "2 ML startup exits. Presidential AI Strategy Committee member, participating in national AI policy. Contributing to practical AI use." },
+        { type: "blank", content: "" },
+
+        // 홍민표
+        { type: "success", content: isKo
+          ? "홍민표 · SEWORKS 창업자"
+          : "Minpyo Hong · Founder, SEWORKS", bullet: true },
+        { type: "output", content: isKo
+          ? "세계 3대 해커. 해커그룹 WOWHACKER 설립, 보안 기업 SEWORKS 창업. 공격자 시각으로 방어를 설계하는 독보적 전문성."
+          : "World's top 3 hacker. Founded WOWHACKER and SEWORKS. Unique expertise in designing defense from attacker's perspective." },
+        { type: "blank", content: "" },
+
+        // 황인하
+        { type: "success", content: isKo
+          ? "황인하 · 부산일과학고 신입생"
+          : "Inha Hwang · Freshman, Busan Science High School", bullet: true },
+        { type: "output", content: isKo
+          ? "HVL 최연소 펠로우. 고등학생이면서 오픈소스 프로젝트에 적극 기여하는 차세대 개발자. 나이보다 실력의 바이브 코딩 문화를 상징."
+          : "Youngest HVL fellow. High schooler actively contributing to open source. Symbolizes vibe coding culture where talent beats age." },
+        { type: "blank", content: "" },
+
+        { type: "dim", content: "─".repeat(50) },
+        { type: "blank", content: "" },
+        { type: "info", content: isKo
+          ? "펠로우와 선발 팀, 펠로우와 펠로우가 서로 배우고 성장하는 8주간의 양방향 빌더 커뮤니티입니다."
+          : "A bidirectional builder community where fellows and selected teams, and fellows among themselves, learn and grow together for 8 weeks.", bullet: true },
+        { type: "blank", content: "" },
+        { type: "blink", content: isKo ? "Enter를 눌러 계속하세요..." : "Press Enter to continue..." },
+        { type: "blank", content: "" },
+      );
+      break;
+
+    case "faq":
+      // Terminal prompt style command
+      lines.push({ type: "prompt", content: "cat faq.md" });
+      lines.push({ type: "blank", content: "" });
+      // ASCII art header
+      FAQ_ASCII.forEach(line => {
+        lines.push({ type: "ascii", content: line });
+      });
+      lines.push(
+        { type: "blank", content: "" },
+        { type: "header", content: isKo ? "자주 묻는 질문" : "FREQUENTLY ASKED QUESTIONS", bullet: true },
+        { type: "blank", content: "" },
+        { type: "dim", content: "─".repeat(50) },
+        { type: "blank", content: "" },
+
+        // 참여 자격
+        { type: "success", content: isKo ? "참여 자격" : "ELIGIBILITY", bullet: true },
+        { type: "blank", content: "" },
+
+        { type: "info", content: isKo
+          ? "Q. Crypto/Web3 프로젝트만 지원 가능한가요?"
+          : "Q. Are only Crypto/Web3 projects eligible?", bullet: true },
+        { type: "output", content: isKo
+          ? "A. 아닙니다. AI, SaaS, 핀테크, 커머스 등 분야에 관계없이 지원 가능합니다. 핵심은 바이브코딩을 활용해 실제 작동하는 프로덕트를 만들고 있는지 여부입니다."
+          : "A. No. You can apply regardless of field — AI, SaaS, fintech, commerce, etc. What matters is whether you're building a working product using vibe coding." },
+        { type: "blank", content: "" },
+
+        { type: "info", content: isKo
+          ? "Q. 이미 투자를 받은 팀도 지원할 수 있나요?"
+          : "Q. Can teams with existing investment apply?", bullet: true },
+        { type: "output", content: isKo
+          ? "A. 네, 가능합니다. 기존 투자 이력에 관계없이 지원할 수 있습니다."
+          : "A. Yes. You can apply regardless of existing investment history." },
+        { type: "blank", content: "" },
+
+        { type: "info", content: isKo
+          ? "Q. 비개발자도 참여 가능한가요?"
+          : "Q. Can non-developers participate?", bullet: true },
+        { type: "output", content: isKo
+          ? "A. 네. 바이브코딩은 비개발자도 AI 도구를 활용해 직접 프로덕트를 만드는 것을 지향합니다. 기술 배경 여부보다 실행력을 봅니다."
+          : "A. Yes. Vibe coding enables non-developers to build products using AI tools. We look at execution, not technical background." },
+        { type: "blank", content: "" },
+
+        { type: "info", content: isKo
+          ? "Q. 팀원이 직장인이어도 되나요?"
+          : "Q. Can team members be employed full-time elsewhere?", bullet: true },
+        { type: "output", content: isKo
+          ? "A. 풀타임 커밋이 가능한 팀을 선호합니다. 8주간 집중적인 스프린트 기반으로 운영되므로, 충분한 시간 투입이 가능한지 지원서에 구체적으로 설명해 주세요."
+          : "A. We prefer teams that can commit full-time. Since the program runs on intensive 8-week sprints, please explain in your application if you can dedicate sufficient time." },
+        { type: "blank", content: "" },
+
+        { type: "info", content: isKo
+          ? "Q. 팀원이 해외에 있어도 되나요?"
+          : "Q. Can team members be located overseas?", bullet: true },
+        { type: "output", content: isKo
+          ? "A. 원격 참여 가능합니다. 단, 최소 1명은 서울 오프라인 모임과 프로그램 기간 중 예정된 집중 합숙에 참석해야 합니다."
+          : "A. Remote participation is possible. However, at least one member must attend Seoul offline meetings and the intensive bootcamp scheduled during the program." },
+        { type: "blank", content: "" },
+
+        { type: "dim", content: "─".repeat(50) },
+        { type: "blank", content: "" },
+
+        // 프로그램 운영
+        { type: "success", content: isKo ? "프로그램 운영" : "PROGRAM OPERATIONS", bullet: true },
+        { type: "blank", content: "" },
+
+        { type: "info", content: isKo
+          ? "Q. 8주간 어떻게 진행되나요?"
+          : "Q. How does the 8-week program work?", bullet: true },
+        { type: "output", content: isKo
+          ? "A. 위클리 배포 스프린트 중심으로 운영됩니다. 매주 프로덕트를 배포하고, 스프린트 리뷰를 통해 Fellow와 동료 팀으로부터 피드백을 받습니다. 프로그램 기간 중 집중 합숙도 예정되어 있습니다."
+          : "A. It runs on weekly deployment sprints. Each week you deploy your product and receive feedback from Fellows and peer teams through sprint reviews. An intensive bootcamp is also scheduled during the program." },
+        { type: "blank", content: "" },
+
+        { type: "info", content: isKo
+          ? "Q. Fellow는 어떤 역할을 하나요?"
+          : "Q. What role do Fellows play?", bullet: true },
+        { type: "output", content: isKo
+          ? "A. 17명의 업계 전문가가 Fellow로 참여합니다. 스프린트 리뷰 피드백, 1:1 오피스아워(30분), 기술 및 시장 전략 조언 등을 통해 선발팀의 성장을 지원합니다."
+          : "A. 17 industry experts participate as Fellows. They support selected teams through sprint review feedback, 1:1 office hours (30 min), and tech/market strategy advice." },
+        { type: "blank", content: "" },
+
+        { type: "dim", content: "─".repeat(50) },
+        { type: "blank", content: "" },
+
+        // 투자 & 선발 기준
+        { type: "success", content: isKo ? "투자 & 선발 기준" : "INVESTMENT & SELECTION", bullet: true },
+        { type: "blank", content: "" },
+
+        { type: "info", content: isKo
+          ? "Q. 투자 조건은 어떻게 되나요?"
+          : "Q. What are the investment terms?", bullet: true },
+        { type: "output", content: isKo
+          ? "A. 5% 지분에 1억원이며, 선발 발표 즉시 집행됩니다."
+          : "A. 100M KRW for 5% equity, executed immediately upon selection announcement." },
+        { type: "blank", content: "" },
+
+        { type: "info", content: isKo
+          ? "Q. 선발 시 가장 중요하게 보는 기준은 무엇인가요?"
+          : "Q. What's the most important selection criteria?", bullet: true },
+        { type: "output", content: isKo
+          ? "A. 실제 작동하는 프로덕트와 구현력을 가장 중요하게 봅니다. 비전보다 실행, 기술 고도화보다 MVP 배포 후 트랙션을 선호합니다. 지원 시 프로덕트 URL과 데모를 함께 제출해 주세요."
+          : "A. We value working products and implementation ability most. Execution over vision, traction after MVP deployment over technical sophistication. Please submit product URL and demo with your application." },
+        { type: "blank", content: "" },
+
+        { type: "info", content: isKo
+          ? "Q. 피벗에 대해 어떻게 생각하나요?"
+          : "Q. What's your view on pivoting?", bullet: true },
+        { type: "output", content: isKo
+          ? "A. 빠른 피벗을 환영합니다. 시장 반응에 따라 과감하게 방향을 전환하는 것은 실패가 아니라 학습의 증거입니다."
+          : "A. We welcome fast pivots. Boldly changing direction based on market response is not failure — it's evidence of learning." },
+        { type: "blank", content: "" },
+
+        { type: "blink", content: isKo ? "Enter를 눌러 계속하세요..." : "Press Enter to continue..." },
+        { type: "blank", content: "" },
+      );
+      break;
+
     case "hashed":
       // Terminal prompt style command
       lines.push({ type: "prompt", content: "cat hashed.md" });
@@ -2436,7 +2769,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
       });
       lines.push(
         { type: "blank", content: "" },
-        { type: "header", content: isKo ? "5-1. 왜 Hashed인가?" : "5-1. WHY HASHED?", bullet: true },
+        { type: "header", content: isKo ? "7-1. 왜 Hashed인가?" : "7-1. WHY HASHED?", bullet: true },
         { type: "blank", content: "" },
         { type: "info", content: "200+ 포트폴리오  |  10+ 유니콘 배출  |  6 글로벌 거점", bullet: true },
         { type: "blank", content: "" },
@@ -2481,7 +2814,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
 
         // Hashed as Vibe Coding Organization
-        { type: "header", content: isKo ? "5-2. 자본가에서 신뢰+유통 라우터로" : "5-2. FROM CAPITALIST TO TRUST+DISTRIBUTION ROUTER", bullet: true },
+        { type: "header", content: isKo ? "7-2. 자본가에서 신뢰+유통 라우터로" : "7-2. FROM CAPITALIST TO TRUST+DISTRIBUTION ROUTER", bullet: true },
         { type: "blank", content: "" },
         { type: "output", content: isKo
           ? "2026년 현재, MVP를 만드는데 1억 원도 과할 정도로 비용이 내려갔습니다. 1-2명이 AI로 제품을 만드는데 10억이 필요하지 않습니다."
@@ -2657,7 +2990,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
       });
       lines.push(
         { type: "blank", content: "" },
-        { type: "header", content: isKo ? "6-1. 투자 조건" : "6-1. INVESTMENT TERMS", bullet: true },
+        { type: "header", content: isKo ? "8-1. 투자 조건" : "8-1. INVESTMENT TERMS", bullet: true },
         { type: "blank", content: "" },
 
         // Investment terms in a box
@@ -2687,7 +3020,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
 
         // How to Apply
-        { type: "header", content: isKo ? "6-2. 지원 방법" : "6-2. HOW TO APPLY", bullet: true },
+        { type: "header", content: isKo ? "8-2. 지원 방법" : "8-2. HOW TO APPLY", bullet: true },
         { type: "blank", content: "" },
         { type: "status-info", content: isKo
           ? "vibelabs@hashed.com 으로 아래 내용을 포함해 메일을 보내주세요."

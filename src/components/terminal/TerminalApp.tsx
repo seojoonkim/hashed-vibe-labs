@@ -2841,7 +2841,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
 
         // Agentic VC
-        { type: "header", content: isKo ? "5-3. Agentic VC로의 진화" : "5-3. EVOLUTION TO AGENTIC VC", bullet: true },
+        { type: "header", content: isKo ? "7-3. Agentic VC로의 진화" : "7-3. EVOLUTION TO AGENTIC VC", bullet: true },
         { type: "blank", content: "" },
         { type: "output", content: isKo
           ? "Hashed는 대표부터 모든 파트너와 전 직원이 바이브 코딩을 학습하고 실제 업무에 적용하고 있습니다."
@@ -2876,7 +2876,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
 
         // Portfolio Distribution
-        { type: "header", content: isKo ? "5-4. Hashed 포트폴리오 분포" : "5-4. HASHED PORTFOLIO DISTRIBUTION", bullet: true },
+        { type: "header", content: isKo ? "7-4. Hashed 포트폴리오 분포" : "7-4. HASHED PORTFOLIO DISTRIBUTION", bullet: true },
         { type: "blank", content: "" },
         { type: "dim", content: isKo
           ? "전 세계 혁신 스타트업에 투자하고 있으며, 북미와 아시아에 집중하면서도 지리적 다양성을 유지하고 있습니다."
@@ -2891,7 +2891,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
 
         // What Hashed Provides
-        { type: "header", content: isKo ? "5-5. Hashed가 제공하는 것" : "5-5. WHAT HASHED PROVIDES", bullet: true },
+        { type: "header", content: isKo ? "7-5. Hashed가 제공하는 것" : "7-5. WHAT HASHED PROVIDES", bullet: true },
         { type: "blank", content: "" },
         { type: "dim", content: isKo
           ? "일반적인 액셀러레이터의 강의나 멘토링 세션과는 조금 다른 접근입니다. 팀이 실제로 필요할 때, 필요한 것을 연결하려고 합니다."
@@ -2960,7 +2960,7 @@ function getSectionContent(sectionId: string, language: string): Omit<TerminalLi
         { type: "blank", content: "" },
 
         // Global Co-investors
-        { type: "header", content: isKo ? "5-6. 글로벌 공동투자사 네트워크" : "5-6. GLOBAL CO-INVESTOR NETWORK", bullet: true },
+        { type: "header", content: isKo ? "7-6. 글로벌 공동투자사 네트워크" : "7-6. GLOBAL CO-INVESTOR NETWORK", bullet: true },
         { type: "blank", content: "" },
         { type: "dim", content: isKo
           ? "Hashed와 함께 딜플로우를 교환하고 공동투자해온 해외 투자사들:"

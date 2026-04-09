@@ -11,7 +11,7 @@ export default function ApplyForm({ language, onComplete, onCancel }: ApplyFormP
 
   return (
     <div className="py-4">
-      <div className="text-[#e07a5f] font-bold mb-4">
+      <div className="text-terminal-accent font-bold mb-4">
         {isKo ? "📧 지원 안내" : "📧 Application Guide"}
       </div>
       
@@ -52,7 +52,7 @@ export default function ApplyForm({ language, onComplete, onCancel }: ApplyFormP
       <div className="flex gap-3">
         <a
           href="mailto:vibelabs@hashed.com?subject=[HVL 지원] "
-          className="px-4 py-2 bg-[#e07a5f] text-white rounded hover:bg-[#d06a4f] transition-colors"
+          className="px-4 py-2 bg-terminal-accent text-white rounded hover:bg-terminal-accent-hover transition-colors"
         >
           {isKo ? "이메일 보내기" : "Send Email"}
         </a>

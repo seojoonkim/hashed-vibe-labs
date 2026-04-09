@@ -3,19 +3,22 @@ export const PROGRAM_DATA = {
   subtitle: "AI-Native Founder Early Selection System",
 
   dates: {
-    meetup: "2025-01-30",
-    applicationStart: "2025-02-01",
-    applicationEnd: "2025-02-19",
-    finalistAnnouncement: "2025-02-27",
-    programStart: "2025-03",
-    programEnd: "2025-04",
+    meetup: "2026-01-30",
+    applicationStart: "2026-02-01",
+    applicationEnd: "2026-02-19",
+    finalistAnnouncement: "2026-02-27",
+    programStart: "2026-03",
+    programEnd: "2026-04",
   },
 
   investment: {
     teamsSelected: "3-5",
-    amountPerTeam: "최대 2억 원",
+    amountPerTeam: "1억원 (5% 지분)",
     type: "직접 투자",
   },
+
+  contactEmail: "vibelabs@hashed.com",
+  founderEmail: "simon@hashed.com",
 
   applyUrl: "#apply",
 };

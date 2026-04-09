@@ -8,7 +8,7 @@ interface CheckSubmissionProps {
 export default function CheckSubmission({ onCancel }: CheckSubmissionProps) {
   return (
     <div className="py-4">
-      <div className="text-[#e07a5f] font-bold mb-4">
+      <div className="text-terminal-accent font-bold mb-4">
         📬 제출 확인
       </div>
       

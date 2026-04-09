@@ -38,6 +38,10 @@ const config: Config = {
           DEFAULT: "rgba(195, 237, 161, 0.3)",
           light: "rgba(195, 237, 161, 0.5)",
           dark: "rgba(195, 237, 161, 0.15)",
+        },
+        "terminal-accent": {
+          DEFAULT: "var(--accent-orange)",
+          hover: "var(--accent-orange-hover)",
         }
       },
       fontFamily: {

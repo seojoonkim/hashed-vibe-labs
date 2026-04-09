@@ -221,7 +221,7 @@ const translations: Record<Language, Record<string, unknown>> = {
     },
     footer: {
       tagline: "기술의 미래에 투자합니다",
-      copyright: "© 2025 Hashed",
+      copyright: "© 2026 Hashed",
     },
     common: {
       days: "일",
@@ -378,7 +378,7 @@ const translations: Record<Language, Record<string, unknown>> = {
     },
     footer: {
       tagline: "Investing in the future of technology",
-      copyright: "© 2025 Hashed",
+      copyright: "© 2026 Hashed",
     },
     common: {
       days: "Days",
